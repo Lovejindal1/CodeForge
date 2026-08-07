@@ -18,6 +18,22 @@ const getCurrentUser = async(req,res)=>{
     }
 }
 
+const updateProfile = async (req, res) => {
+
+    try {
+        const user = await userService.updateProfile(req.user.id, req.body);
+        res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            data: user
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
 module.exports={ 
-    getCurrentUser
+    getCurrentUser, updateProfile
 }

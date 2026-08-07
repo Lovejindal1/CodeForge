@@ -9,6 +9,17 @@ const getCurrentUser = async (userId) =>{
     return user;
 }
 
+const updateProfile = async (userId, userData) =>{
+    const updatedUser = await userRepository.updateProfile(userId, 
+        {
+            name: userData.name
+        }
+    );
+    if(!updateProfile){
+        throw new Error("User not found");
+    }
+    return updatedUser;
+}
 module.exports = {
-    getCurrentUser
+    getCurrentUser, updateProfile
 };

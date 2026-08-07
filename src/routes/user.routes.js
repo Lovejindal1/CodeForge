@@ -7,4 +7,5 @@ const router = express.Router();
 
 router.get("/me", authMiddleware, userController.getCurrentUser);
 
+router.put("/update-profile", authMiddleware, userController.updateProfile)
 module.exports = router;
