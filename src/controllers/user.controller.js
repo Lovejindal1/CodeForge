@@ -1,0 +1,23 @@
+const userService = require("../services/user.service");
+
+const getCurrentUser = async(req,res)=>{
+
+    try{
+        const user = await userService.getCurrentUser(req.user.id);
+        res.status(200).json({
+            success: true,
+            message: "User Found",
+            data: user
+        });
+    }
+    catch(error){
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
+module.exports={ 
+    getCurrentUser
+}

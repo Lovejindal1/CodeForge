@@ -2,6 +2,8 @@ const express = require('express');
 const authMiddleware = require("../middlewares/auth.middleware");
 
 const authRoutes = require("./auth.routes");
+const userRoutes = require("./user.routes");
+
 const router = express.Router();
 
 router.get('/', (req,res)=>{
@@ -11,16 +13,16 @@ router.get('/', (req,res)=>{
     })
 });
 
-
-router.get("/profile",authMiddleware,(req, res) => {
-        res.json({
-            success: true,
-            user: req.user
-        });
-    }
-
-);
+// router.get("/profile",authMiddleware,(req, res) => {
+//         res.json({
+//             success: true,
+//             user: req.user
+//         });
+//     }
+// );
 
 router.use("/auth", authRoutes);
+
+router.use("/users", userRoutes);
 
 module.exports=router;
