@@ -1,5 +1,5 @@
 const express = require('express');
-const authMiddleware = require("../middlewares/auth.middleware");
+const {authMiddleware,adminMiddleware} = require("../middlewares/auth.middleware");
 
 const authRoutes = require("./auth.routes");
 const userRoutes = require("./user.routes");
@@ -20,6 +20,21 @@ router.get('/', (req,res)=>{
 //         });
 //     }
 // );
+
+// router.get(
+//     "/admin-test",
+//     authMiddleware,
+//     adminMiddleware,
+//     (req, res) => {
+//         res.status(200).json({
+//             success: true,
+//             message: "You are an admin",
+//             user: req.user
+//         });
+
+//     }
+// );
+
 
 router.use("/auth", authRoutes);
 

@@ -10,7 +10,7 @@ const register = async (userData) =>{
     if (userData.password.length < 8) {
         throw new Error("Password must be at least 8 characters");
     }
-    
+
     const hashPassword = await bcrypt.hash(userData.password,10);
 
     userData.password = hashPassword;
@@ -31,7 +31,8 @@ const login =  async (userData) => {
     const token = jwt.sign(
         {
             id: user._id,
-            email: user.email
+            email: user.email,
+            role: user.role
         },
         process.env.JWT_SECRET,
         {
