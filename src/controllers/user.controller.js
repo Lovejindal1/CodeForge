@@ -34,6 +34,22 @@ const updateProfile = async (req, res) => {
         });
     }
 };
+
+const changePassword = async (req, res) =>{
+    try {
+        await userService.changePassword(req.user.id, req.body);
+        res.status(200).json({
+            success: true,
+            message: "Password changed successfully"
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
 module.exports={ 
-    getCurrentUser, updateProfile
+    getCurrentUser, updateProfile, changePassword
 }

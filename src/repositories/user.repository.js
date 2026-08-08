@@ -19,6 +19,10 @@ const updateProfile = async (id, data) => {
     }).select("-password");
 }
 
+const updatePassword = async (id, hashPassword) => {
+    return await User.findById(id, {password: hashPassword}, {new: true});
+}
+
 module.exports = {
-    create, findByEmail, findById, updateProfile
+    create, findByEmail, findById, updateProfile, updatePassword
 }

@@ -4,7 +4,15 @@ const jwt = require("jsonwebtoken");
 const userRepository = require("../repositories/user.repository");
 
 const register = async (userData) =>{
+    if (!userData.name || !userData.email || !userData.password) {
+        throw new Error("Name, email and password are required");
+    }
+    if (userData.password.length < 8) {
+        throw new Error("Password must be at least 8 characters");
+    }
+    
     const hashPassword = await bcrypt.hash(userData.password,10);
+
     userData.password = hashPassword;
     const user = await userRepository.create(userData);
     return user;

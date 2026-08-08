@@ -7,5 +7,8 @@ const router = express.Router();
 
 router.get("/me", authMiddleware, userController.getCurrentUser);
 
-router.put("/update-profile", authMiddleware, userController.updateProfile)
+router.put("/update-profile", authMiddleware, userController.updateProfile);
+
+router.put("/change-password", authMiddleware, userController.changePassword);
+
 module.exports = router;
