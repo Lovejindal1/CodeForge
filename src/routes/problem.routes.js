@@ -9,13 +9,16 @@ const router = express.Router();
 // Create Problems by admin
 router.post("/", authMiddleware, adminMiddleware, problemController.createProblem);
 
-// Ftech all problems using filter
+// Get all + filters + pagination
 router.get("/", problemController.getProblems);
 
-//Search problem by id
+// Get single problem
 router.get("/:id", problemController.getProblemById);
 
-//Update by admin
+// Update problem by admin
 router.put("/:id", authMiddleware, adminMiddleware, problemController.updateProblem);
+
+// Delete problem by admin 
+router.delete("/:id", authMiddleware, adminMiddleware, problemController.updateProblem);
 
 module.exports = router;

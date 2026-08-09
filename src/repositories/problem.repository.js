@@ -31,6 +31,10 @@ const updateById = async (id, data) => {
     );
 };
 
+const deleteById = async (id) => {
+    return await Problem.findByIdAndDelete(id);
+};
+
 module.exports = {
     create, findAll, count, findById, deleteById, updateById
 }
