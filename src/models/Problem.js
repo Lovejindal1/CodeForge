@@ -3,6 +3,11 @@ const { trim } = require("validator");
 
 const problemSchema = new mongoose.Schema(
     {
+        problemNumber: {
+            type: Number,
+            required: true,
+            unique: true
+        },
         title: {
             type: String, 
             required: true,
@@ -24,7 +29,7 @@ const problemSchema = new mongoose.Schema(
             trim: true
             }
         ],
-        constrains: [  
+        constraints: [  
             {
             type: String
             }

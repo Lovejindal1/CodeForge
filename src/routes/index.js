@@ -3,6 +3,7 @@ const {authMiddleware,adminMiddleware} = require("../middlewares/auth.middleware
 
 const authRoutes = require("./auth.routes");
 const userRoutes = require("./user.routes");
+const problemRoutes = require("./problem.routes");
 
 const router = express.Router();
 
@@ -39,5 +40,7 @@ router.get('/', (req,res)=>{
 router.use("/auth", authRoutes);
 
 router.use("/users", userRoutes);
+
+router.use("/problems", problemRoutes);
 
 module.exports=router;
