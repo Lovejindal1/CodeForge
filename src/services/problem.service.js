@@ -44,6 +44,12 @@ const getProblems = async (query) => {
     };
 }
 
+const updateProblem = async (id, data) => {
+    const problem = await problemRepository.updateById(id, data);
+    if (!problem)  throw new Error("Problem not found");
+    return problem;
+};
+
 const getProblemById = async (id) => {
     const problem = await problemRepository.findById(id);
     if (!problem) {
@@ -53,5 +59,5 @@ const getProblemById = async (id) => {
 };
 
 module.exports = {
-    createProblem, getProblems, getProblemById
+    createProblem, getProblems, getProblemById, updateProblem
 }
