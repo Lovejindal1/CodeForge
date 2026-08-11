@@ -1,4 +1,5 @@
 const problemService = require("../services/problem.service");
+const submissionService = require("../services/submission.service");
 
 const createProblem = async (req, res) => {
 
@@ -83,6 +84,22 @@ const deleteProblem = async (req, res) => {
     }
 };
 
+const getProblemSubmissions = async (req, res) => {
+
+    try {
+        const submissions = await submissionService.getProblemSubmissions(req.user.id, req.params.problemId);
+        res.status(200).json({
+            success: true,
+            data: submissions
+        });
+    } catch (error) {
+        res.status(404).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 module.exports = {
-    createProblem, getProblems, getProblemById, updateProblem, deleteProblem
+    createProblem, getProblems, getProblemById, updateProblem, deleteProblem, getProblemSubmissions
 };

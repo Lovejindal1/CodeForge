@@ -19,10 +19,6 @@ const findById = async (id) => {
     return await Problem.findById(id);
 };
 
-const deleteById = async (id) => {
-    return await Problem.findByIdAndDelete(id);
-};
-
 const updateById = async (id, data) => {
     return await Problem.findByIdAndUpdate(id, data, {
             new: true,

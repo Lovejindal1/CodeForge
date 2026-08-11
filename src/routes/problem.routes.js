@@ -12,6 +12,9 @@ router.post("/", authMiddleware, adminMiddleware, problemController.createProble
 // Get all + filters + pagination
 router.get("/", problemController.getProblems);
 
+// Problem-specific submissions
+router.get("/:problemId/submissions", authMiddleware, problemController.getProblemSubmissions);
+
 // Get single problem
 router.get("/:id", problemController.getProblemById);
 
