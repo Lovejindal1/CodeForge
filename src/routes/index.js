@@ -5,6 +5,7 @@ const authRoutes = require("./auth.routes");
 const userRoutes = require("./user.routes");
 const problemRoutes = require("./problem.routes");
 const submissionRoutes = require("./submission.routes");
+const testcaseRoutes = require("./testcase.routes");
 
 const router = express.Router();
 
@@ -45,5 +46,7 @@ router.use("/users", userRoutes);
 router.use("/problems", problemRoutes);
 
 router.use("/submissions", submissionRoutes);
+
+router.use("/testcases", testcaseRoutes);
 
 module.exports=router;
