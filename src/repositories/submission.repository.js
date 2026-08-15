@@ -8,6 +8,10 @@ const findById = async (id) => {
     return await Submission.findById(id).populate("problem", "problemNumber title difficulty").populate("user", "name email");
 };
 
+const updateById = async (id, data) => {
+    return await Submission.findByIdAndUpdate(id, data, { new: true });
+};
+
 const findByUser = async (userId) => {
     return await Submission.find({
         user: userId
@@ -22,5 +26,5 @@ const findByUserAndProblem = async (userId, problemId) => {
 };
 
 module.exports = {
-    create, findById, findByUser, findByUserAndProblem
+    create, findById, updateById, findByUser, findByUserAndProblem
 };

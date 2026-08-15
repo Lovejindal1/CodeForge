@@ -11,4 +11,6 @@ router.get("/my", authMiddleware, submissionController.getMySubmissions);
 
 router.get("/:id", authMiddleware, submissionController.getSubmissionById);
 
+router.post("/:id/judge", authMiddleware, submissionController.judgeSubmission);
+
 module.exports = router;
