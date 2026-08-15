@@ -9,6 +9,8 @@ router.post("/", authMiddleware, submissionController.createSubmission);
 
 router.get("/my", authMiddleware, submissionController.getMySubmissions);
 
+router.get("/problem/:problemId", authMiddleware, submissionController.getProblemSubmissions);
+
 router.get("/:id", authMiddleware, submissionController.getSubmissionById);
 
 router.post("/:id/judge", authMiddleware, submissionController.judgeSubmission);

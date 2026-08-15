@@ -12,19 +12,36 @@ const updateById = async (id, data) => {
     return await Submission.findByIdAndUpdate(id, data, { new: true });
 };
 
-const findByUser = async (userId) => {
+const findByUser = async (userId, skip, limit) => {
     return await Submission.find({
         user: userId
-    }).populate("problem", "problemNumber title difficulty").sort({ createdAt: -1 });
+    })
+        .populate("problem", "problemNumber title difficulty")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
 };
 
-const findByUserAndProblem = async (userId, problemId) => {
+const countByUser = async (userId) => {
+    return await Submission.countDocuments({
+        user: userId
+    });
+};
+
+const findByUserAndProblem = async (userId, problemId,  skip, limit) => {
     return await Submission.find({
         user: userId,
         problem: problemId
-    }).sort({ createdAt: -1 });
+    }).populate("problem", "problemNumber title difficulty").sort({ createdAt: -1 }).skip(skip).limit(limit);;
+};
+
+const countByUserAndProblem = async (userId, problemId) => {
+    return await Submission.countDocuments({
+        user: userId,
+        problem: problemId
+    });
 };
 
 module.exports = {
-    create, findById, updateById, findByUser, findByUserAndProblem
+    create, findById, updateById, findByUser, findByUserAndProblem, countByUser, countByUserAndProblem
 };

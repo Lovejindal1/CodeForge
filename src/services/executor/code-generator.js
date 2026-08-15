@@ -25,6 +25,32 @@ vector<int> parseVectorInt(string input) {
 
 const generateParameterParser = (parameter, index) => {
 
+    if (parameter.type === "bool") {
+        return `
+    bool ${parameter.name} =
+        (lines[${index}] == "true" || lines[${index}] == "1");
+`;
+    }
+
+    if (parameter.type === "double") {
+        return `
+        double ${parameter.name} = stod(lines[${index}]);
+`;
+    }
+
+    if (parameter.type === "vector<string>") {
+        return `
+    vector<string> ${parameter.name} =
+        parseVectorString(lines[${index}]);
+`;
+}
+
+    if (parameter.type === "long long") {
+        return `
+    long long ${parameter.name} = stoll(lines[${index}]);
+`;
+    }
+
     if (parameter.type === "vector<int>") {
         return `
     vector<int> ${parameter.name} = parseVectorInt(lines[${index}]);
@@ -50,6 +76,30 @@ const generateParameterParser = (parameter, index) => {
 
 
 const generateReturnOutput = (returnType) => {
+    if (returnType === "double") {
+        return `
+    cout << result;
+`;
+    }
+
+    if (returnType === "long long") {
+    return `
+    cout << result;
+`;
+    }
+
+    if (returnType === "vector<string>") {
+    return `
+    cout << "[";
+
+    for (int i = 0; i < result.size(); i++) {
+        if (i > 0) cout << ",";
+         cout << "\"" << result[i] << "\"";
+    }
+
+    cout << "]";
+`;
+    }
 
     if (returnType === "vector<int>") {
         return `
@@ -88,6 +138,43 @@ const generateReturnOutput = (returnType) => {
 };
 
 
+const generateVectorStringParser = () => {
+    return `
+vector<string> parseVectorString(string input) {
+
+    input.erase(
+        remove(input.begin(), input.end(), '['),
+        input.end()
+    );
+
+    input.erase(
+        remove(input.begin(), input.end(), ']'),
+        input.end()
+    );
+
+    vector<string> result;
+
+    if (input.empty()) {
+        return result;
+    }
+
+    stringstream ss(input);
+    string value;
+
+    while (getline(ss, value, ',')) {
+        value.erase(
+            remove(value.begin(), value.end(), '"'),
+            value.end()
+        );
+
+        result.push_back(value);
+    }
+
+    return result;
+}
+`;
+};
+
 const generateCode = (problem, userCode) => {
 
     const judgeConfig = problem.judgeConfig;
@@ -110,11 +197,18 @@ const generateCode = (problem, userCode) => {
         judgeConfig.returnType
     );
 
-    const vectorParser = judgeConfig.parameters.some(
+    const needsVectorIntParser = judgeConfig.parameters.some(
         parameter => parameter.type === "vector<int>"
-    )
-        ? generateVectorIntParser()
-        : "";
+    );
+
+    const needsVectorStringParser = judgeConfig.parameters.some(
+        parameter => parameter.type === "vector<string>"
+    );
+
+    const vectorParser = `
+    ${needsVectorIntParser ? generateVectorIntParser() : ""}
+    ${needsVectorStringParser ? generateVectorStringParser() : ""}
+    `;
 
 const normalizedUserCode = userCode.trim().endsWith(";")
     ? userCode.trim()
@@ -150,6 +244,8 @@ ${returnOutput}
 }
 `;
 };
+
+
 
 
 module.exports = {

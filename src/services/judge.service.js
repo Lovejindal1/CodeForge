@@ -2,15 +2,20 @@ const submissionRepository = require("../repositories/submission.repository");
 const testcaseRepository = require("../repositories/testcase.repository");
 const problemRepository = require("../repositories/problem.repository");
 
-const { executeCpp } = require("./executor/cpp.executor");
+// const { executeCpp } = require("./executor/cpp.executor");
+const { getExecutor } = require("./executor/executor.factory");
 const { generateCode } = require("./executor/code-generator");
 
-const judgeSubmission = async (submissionId) => {
+const judgeSubmission = async (submissionId, userId) => {
     // console.log("🔥 NEW JUDGE SERVICE RUNNING");
     const submission = await submissionRepository.findById(submissionId);
 
     if(!submission) throw new Error("Submission not found");
 
+    if (submission.user._id.toString() !== userId.toString()) throw new Error("Unauthorized");
+
+    if (submission.status === "running") throw new Error("Submission is already being judged");
+    
     const problemId = submission.problem._id || submission.problem;
 
     const problem = await problemRepository.findById(problemId);
@@ -30,7 +35,9 @@ const judgeSubmission = async (submissionId) => {
 
     const executableCode = generateCode(problem, submission.code);
 
-    const result = await executeCpp(executableCode, testCases);
+    const executor = getExecutor(submission.language);
+
+    const result = await executor(executableCode, testCases);
 
     let passedTests = 0;
     let totalRuntime = 0;
@@ -41,7 +48,10 @@ const judgeSubmission = async (submissionId) => {
         const testResult = result.results[i];
 
         totalRuntime += testResult.runtime || 0;
-        maxMemory = Math.max(maxMemory, testResult.memory || 0);
+
+        if (testResult.memory) {
+            maxMemory = Math.max(maxMemory, testResult.memory);
+        }
 
         if (testResult.status !== "success") {
 

@@ -4,11 +4,15 @@ const judgeService = require("../services/judge.service");
 const createSubmission = async (req, res) => {
 
     try {
+
         const submission = await submissionService.createSubmission(req.body, req.user.id);
+
+        const result = await judgeService.judgeSubmission( submission._id, req.user.id );
+
         res.status(201).json({
             success: true,
-            message: "Submission created successfully",
-            data: submission
+            message: "Submission judged successfully",
+            data: result
         });
     } catch (error) {
         res.status(500).json({
@@ -21,7 +25,7 @@ const createSubmission = async (req, res) => {
 const getSubmissionById = async (req, res) => {
 
     try {
-        const submission = await submissionService.getSubmissionById(req.params.id);
+        const submission = await submissionService.getSubmissionById(req.params.id, req.user.id);
         res.status(200).json({
             success: true,
             data: submission
@@ -35,9 +39,12 @@ const getSubmissionById = async (req, res) => {
 };
 
 const getMySubmissions = async (req, res) => {
-    
-    try{
-        const submissions = await submissionService.getMySubmissions(req.user.id);
+    try {
+        const submissions = await submissionService.getMySubmissions(
+            req.user.id,
+            req.query
+        );
+
         res.status(200).json({
             success: true,
             data: submissions
@@ -54,7 +61,7 @@ const getMySubmissions = async (req, res) => {
 const getProblemSubmissions = async (req, res) => {
     
     try {
-        const submissions =await submissionService.getProblemSubmissions(req.user.id, req.params.problemId);
+        const submissions =await submissionService.getProblemSubmissions(req.user.id, req.params.problemId, req.query);
         res.status(200).json({
             success: true,
             data: submissions
@@ -69,7 +76,10 @@ const getProblemSubmissions = async (req, res) => {
 
 const judgeSubmission = async (req, res) => {
     try {
-        const result = await judgeService.judgeSubmission(req.params.id);
+        const submission = await submissionService.getSubmissionById(req.params.id, req.user.id);
+
+        const result = await judgeService.judgeSubmission(submission._id, req.user.id);
+
         res.status(200).json({
             success: true,
             data: result
@@ -82,6 +92,7 @@ const judgeSubmission = async (req, res) => {
         });
     }
 };
+
 
 module.exports = {
     createSubmission, getSubmissionById, getMySubmissions, getProblemSubmissions, judgeSubmission
