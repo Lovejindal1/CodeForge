@@ -22,6 +22,6 @@ router.get("/:id", problemController.getProblemById);
 router.put("/:id", authMiddleware, adminMiddleware, problemController.updateProblem);
 
 // Delete problem by admin 
-router.delete("/:id", authMiddleware, adminMiddleware, problemController.updateProblem);
+router.delete("/:id", authMiddleware, adminMiddleware, problemController.deleteProblem);
 
 module.exports = router;

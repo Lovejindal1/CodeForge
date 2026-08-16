@@ -87,7 +87,7 @@ const deleteProblem = async (req, res) => {
 const getProblemSubmissions = async (req, res) => {
 
     try {
-        const submissions = await submissionService.getProblemSubmissions(req.user.id, req.params.problemId);
+        const submissions = await submissionService.getProblemSubmissions(req.user.id, req.params.problemId, req.query);
         res.status(200).json({
             success: true,
             data: submissions

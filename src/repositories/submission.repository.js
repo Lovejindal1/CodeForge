@@ -12,20 +12,16 @@ const updateById = async (id, data) => {
     return await Submission.findByIdAndUpdate(id, data, { new: true });
 };
 
-const findByUser = async (userId, skip, limit) => {
-    return await Submission.find({
-        user: userId
-    })
+const findByFilter = async (filter, skip, limit) => {
+    return await Submission.find(filter)
         .populate("problem", "problemNumber title difficulty")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
 };
 
-const countByUser = async (userId) => {
-    return await Submission.countDocuments({
-        user: userId
-    });
+const countByFilter = async (filter) => {
+    return await Submission.countDocuments(filter);
 };
 
 const findByUserAndProblem = async (userId, problemId,  skip, limit) => {
@@ -42,6 +38,37 @@ const countByUserAndProblem = async (userId, problemId) => {
     });
 };
 
+const countByUser = async (userId) => {
+    return await Submission.countDocuments({
+        user: userId
+    });
+};
+
+const countByUserAndStatus = async (userId, status) => {
+    return await Submission.countDocuments({
+        user: userId,
+        status
+    });
+};
+
+const countSolvedProblems = async (userId) => {
+    const problems = await Submission.distinct("problem", {
+        user: userId,
+        status: "accepted"
+    });
+
+    return problems.length;
+};
+
+const findRecentByUser = async (userId, limit = 5) => {
+    return await Submission.find({
+        user: userId
+    })
+        .populate("problem", "problemNumber title difficulty")
+        .sort({ createdAt: -1 })
+        .limit(limit);
+};
+
 module.exports = {
-    create, findById, updateById, findByUser, findByUserAndProblem, countByUser, countByUserAndProblem
+    create, findById, updateById, findByUserAndProblem, countByUserAndProblem, findByFilter, countByFilter, countByUserAndStatus, countSolvedProblems, findRecentByUser, countByUser
 };

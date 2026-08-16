@@ -39,9 +39,16 @@ const getMySubmissions = async (userId, query) => {
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    const filter = {
+        user: userId
+    };
+
+    if (query.status) {
+        filter.status = query.status;
+    }
     const [submissions, total] = await Promise.all([
-        submissionRepository.findByUser(userId, skip, limit),
-        submissionRepository.countByUser(userId)
+        submissionRepository.findByFilter(filter, skip, limit),
+        submissionRepository.countByFilter(filter)
     ]);
 
     return {
@@ -54,7 +61,6 @@ const getMySubmissions = async (userId, query) => {
         }
     };
 };
-
 
 const getProblemSubmissions = async (userId, problemId, query) => {
 
@@ -79,6 +85,31 @@ const getProblemSubmissions = async (userId, problemId, query) => {
 };
 
 
+const getMyStats = async (userId) => {
+
+    const [
+        totalSubmissions, accepted, wrongAnswer, compileError, runtimeError, timeLimitExceeded, solvedProblems, recentSubmissions
+    ] = await Promise.all([
+        submissionRepository.countByUser(userId),
+
+        submissionRepository.countByUserAndStatus(userId, "accepted"),
+        submissionRepository.countByUserAndStatus(userId, "wrong_answer"),
+        submissionRepository.countByUserAndStatus(userId, "compile_error"),
+        submissionRepository.countByUserAndStatus(userId, "runtime_error"),
+        submissionRepository.countByUserAndStatus(userId, "time_limit_exceeded"),
+
+        submissionRepository.countSolvedProblems(userId),
+
+        submissionRepository.findRecentByUser(userId, 5)
+    ]);
+
+    const acceptanceRate = totalSubmissions === 0 ? 0 : Number(((accepted / totalSubmissions) * 100).toFixed(2));
+
+    return {
+        totalSubmissions, accepted, wrongAnswer, compileError, runtimeError, timeLimitExceeded, solvedProblems, acceptanceRate, recentSubmissions
+    };
+};
+
 module.exports = {
-    createSubmission, getSubmissionById, getMySubmissions, getProblemSubmissions
+    createSubmission, getSubmissionById, getMySubmissions, getProblemSubmissions, getMyStats
 };

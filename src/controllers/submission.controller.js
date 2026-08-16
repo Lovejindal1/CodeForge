@@ -93,7 +93,21 @@ const judgeSubmission = async (req, res) => {
     }
 };
 
+const getMyStats = async (req, res) => {
+    try {
+        const stats = await submissionService.getMyStats(req.user.id);
+        res.status(200).json({
+            success: true,
+            data: stats
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
 
 module.exports = {
-    createSubmission, getSubmissionById, getMySubmissions, getProblemSubmissions, judgeSubmission
+    createSubmission, getSubmissionById, getMySubmissions, getProblemSubmissions, judgeSubmission, getMyStats
 };

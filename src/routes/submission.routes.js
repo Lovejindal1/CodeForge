@@ -7,6 +7,8 @@ const router = express.Router();
 
 router.post("/", authMiddleware, submissionController.createSubmission);
 
+router.get("/my/stats", authMiddleware, submissionController.getMyStats);
+
 router.get("/my", authMiddleware, submissionController.getMySubmissions);
 
 router.get("/problem/:problemId", authMiddleware, submissionController.getProblemSubmissions);
