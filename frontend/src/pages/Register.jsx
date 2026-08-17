@@ -8,246 +8,169 @@ function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-    const handleRegister = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-
     setError("");
     setSuccess("");
     setLoading(true);
-
     try {
-      const data = await registerUser({
-        name,
-        email,
-        password,
-      });
-
-      console.log("Register Response:", data);
-
-      setSuccess("Account created successfully! Redirecting to login...");
-
+      await registerUser({ name, email, password });
+      setSuccess("Account created! Redirecting to login...");
       setName("");
       setEmail("");
       setPassword("");
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 1200);
-    } catch (error) {
-      console.error("Register Error:", error);
-
-      setError(
-        error.response?.data?.message ||
-        "Registration failed. Please try again."
-      );
+      setTimeout(() => navigate("/login"), 1200);
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  const checks = [
+    { label: "At least 8 characters", ok: password.length >= 8 },
+    { label: "Contains a number", ok: /\d/.test(password) },
+    { label: "Contains a letter", ok: /[a-zA-Z]/.test(password) },
+  ];
+
   return (
     <div className="auth-page">
-
-      {/* LEFT SIDE - BRANDING */}
+      {/* ── BRAND LEFT ── */}
       <div className="brand-section">
-
         <div className="brand-logo">
-          <div className="logo-symbol">&lt;/&gt;</div>
-          <span>CodeForge</span>
+          <div className="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 6L3 12L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M16 6L21 12L16 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M13 4L11 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </div>
+          <span className="logo-text">CodeForge</span>
         </div>
 
         <div className="brand-content">
-          <p className="small-text">WELCOME TO THE DEVELOPER WORLD</p>
-
-          <h1>
-            BUILD.
-            <br />
-            SOLVE.
-            <br />
-            <span>COMPETE.</span>
+          <p className="brand-eyebrow">Join the community</p>
+          <h1 className="brand-headline">
+            Build.<br />
+            Solve.<br />
+            <span>Compete.</span>
           </h1>
-
-          <p className="brand-description">
-            Practice problems, write better code and sharpen
-            your problem-solving skills with CodeForge.
+          <p className="brand-desc">
+            Join thousands of developers practicing algorithms and data
+            structures. Start your journey today.
           </p>
 
-          {/* TERMINAL */}
           <div className="terminal-card">
-
             <div className="terminal-header">
-              <div className="terminal-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-
-              <span className="terminal-title">
-                codeforge.cpp
-              </span>
+              <div className="terminal-dots"><span /><span /><span /></div>
+              <span className="terminal-name">codeforge — bash</span>
             </div>
-
             <div className="terminal-body">
-              <p>
-                <span className="terminal-green">$</span> codeforge
-              </p>
-
-              <p>
-                <span className="terminal-blue">&gt;</span>{" "}
-                compiling solution.cpp
-              </p>
-
-              <p>
-                <span className="terminal-green">✓</span> Test 1 passed
-              </p>
-
-              <p>
-                <span className="terminal-green">✓</span> Test 2 passed
-              </p>
-
-              <p>
-                <span className="terminal-green">✓</span> Test 3 passed
-              </p>
-
-              <p>
-                <span className="terminal-green">✓</span>{" "}
-                Accepted
-              </p>
+              <p><span className="t-prompt">$</span><span className="t-cmd"> ./solution.cpp</span></p>
+              <p><span className="t-info">›</span><span className="t-cmd"> compiling...</span></p>
+              <p><span className="t-ok">✓</span><span className="t-cmd"> Test 1 passed</span></p>
+              <p><span className="t-ok">✓</span><span className="t-cmd"> Test 2 passed</span></p>
+              <p><span className="t-ok">✓</span><span className="t-cmd"> All tests passed — Accepted!</span></p>
             </div>
-
           </div>
         </div>
 
-        <div className="floating-symbol symbol-one">
-          {"{ }"}
-        </div>
-
-        <div className="floating-symbol symbol-two">
-          {"< >"}
-        </div>
-
-        <div className="floating-symbol symbol-three">
-          {"[ ]"}
-        </div>
-
+        <div className="float-sym s1">{"{ }"}</div>
+        <div className="float-sym s2">{"[ ]"}</div>
+        <div className="float-sym s3">{"< >"}</div>
       </div>
 
-
-      {/* RIGHT SIDE - REGISTER */}
+      {/* ── FORM RIGHT ── */}
       <div className="form-section">
-
-        <div className="register-card">
-
+        <div className="login-card">
           <div className="mobile-logo">
-            <div className="logo-symbol">&lt;/&gt;</div>
+            <div className="logo-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M8 6L3 12L8 18" stroke="var(--orange)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M16 6L21 12L16 18" stroke="var(--orange)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M13 4L11 20" stroke="var(--orange)" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
             <span>CodeForge</span>
           </div>
 
-          <p className="form-welcome">
-            START YOUR JOURNEY
-          </p>
-
-          <h2>Create Account</h2>
-
-          <p className="form-subtitle">
-            Join CodeForge and start solving problems.
-          </p>
-
+          <p className="form-eyebrow">Get started for free</p>
+          <h2 className="form-title">Create Account</h2>
+          <p className="form-subtitle">Join CodeForge and start solving problems.</p>
 
           <form onSubmit={handleRegister}>
-
             <div className="input-group">
-              <label>Name</label>
-
+              <label htmlFor="reg-name">Full Name</label>
               <input
+                id="reg-name"
                 type="text"
-                placeholder="Enter your name"
+                placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                />
+                autoComplete="name"
+              />
             </div>
 
-
             <div className="input-group">
-              <label>Email</label>
-
+              <label htmlFor="reg-email">Email</label>
               <input
+                id="reg-email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                />
+                autoComplete="email"
+              />
             </div>
 
-
             <div className="input-group">
-              <label>Password</label>
-
+              <label htmlFor="reg-password">Password</label>
               <input
+                id="reg-password"
                 type="password"
-                placeholder="Create a password"
+                placeholder="Create a strong password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                />
+                autoComplete="new-password"
+              />
             </div>
 
-
-            <div className="password-info">
-
-              <span>✓ 8+ characters</span>
-              <span>✓ Number</span>
-              <span>✓ Special character</span>
-
-            </div>
-
-
-            <button
-                type="submit"
-                className="register-button"
-                disabled={loading}
-                >
-                {loading ? "Creating Account..." : "Create Account"}
-            </button>
-            {error && (
-                <p style={{ color: "#dc2626", marginTop: "15px" }}>
-                    {error}
-                </p>
-                )}
-
-                {success && (
-                <p style={{ color: "#16a34a", marginTop: "15px" }}>
-                    {success}
-                </p>
+            {/* Password strength hints */}
+            {password.length > 0 && (
+              <div className="pw-checks">
+                {checks.map((c) => (
+                  <span key={c.label} className={`pw-check ${c.ok ? "ok" : ""}`}>
+                    {c.ok ? "✓" : "○"} {c.label}
+                  </span>
+                ))}
+              </div>
             )}
+
+            <button type="submit" className="login-button" disabled={loading} style={{ marginTop: 20 }}>
+              {loading ? "Creating Account..." : "Create Account"}
+            </button>
+
+            {error   && <p className="form-error">{error}</p>}
+            {success && <p className="form-success">{success}</p>}
           </form>
 
-
           <div className="divider">
-            <span></span>
-            <p>OR</p>
-            <span></span>
+            <span /><p>OR</p><span />
           </div>
 
-
-          <p className="login-text">
+          <p className="register-text">
             Already have an account?
-            <span
-              onClick={() => navigate("/login")}
-              style={{ cursor: "pointer" }}
-            > Sign In</span>
+            <span onClick={() => navigate("/login")}>Sign In</span>
           </p>
-
         </div>
-
       </div>
-
     </div>
   );
 }

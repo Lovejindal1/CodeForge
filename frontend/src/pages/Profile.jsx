@@ -39,44 +39,34 @@ function Profile() {
     const fetchData = async () => {
       setLoading(true);
       setLoadError("");
-
       try {
         const [userRes, statsRes] = await Promise.all([
           getCurrentUser(),
           getMyStats(),
         ]);
-
         setUser(userRes.data);
         setName(userRes.data.name);
         setStats(statsRes.data);
       } catch (err) {
-        setLoadError(
-          err.response?.data?.message ||
-          "Failed to load profile. Please try again."
-        );
+        setLoadError(err.response?.data?.message || "Failed to load profile.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
   const handleNameSubmit = async (e) => {
     e.preventDefault();
-
     setNameSaving(true);
     setNameSuccess("");
     setNameError("");
-
     try {
       const res = await updateProfile({ name });
       setUser(res.data);
       setNameSuccess("Name updated successfully!");
     } catch (err) {
-      setNameError(
-        err.response?.data?.message || "Failed to update name. Please try again."
-      );
+      setNameError(err.response?.data?.message || "Failed to update name.");
     } finally {
       setNameSaving(false);
     }
@@ -84,17 +74,13 @@ function Profile() {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-
     setPasswordSuccess("");
     setPasswordError("");
-
     if (newPassword !== confirmPassword) {
-      setPasswordError("New password and confirm password do not match");
+      setPasswordError("Passwords do not match.");
       return;
     }
-
     setPasswordSaving(true);
-
     try {
       await changePassword({ oldPassword, newPassword });
       setPasswordSuccess("Password changed successfully!");
@@ -102,36 +88,26 @@ function Profile() {
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
-      setPasswordError(
-        err.response?.data?.message || "Failed to change password. Please try again."
-      );
+      setPasswordError(err.response?.data?.message || "Failed to change password.");
     } finally {
       setPasswordSaving(false);
     }
   };
 
-  const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
+  const formatDate = (d) =>
+    new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
-  const formatShortDate = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-    });
-  };
+  const formatShort = (d) =>
+    new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 
   if (loading) {
     return (
       <div className="profile-page">
         <Navbar active="profile" />
-        <p className="status-text">Loading profile...</p>
+        <div className="profile-loading">
+          <div className="spinner" />
+          <p>Loading profile...</p>
+        </div>
       </div>
     );
   }
@@ -140,59 +116,54 @@ function Profile() {
     return (
       <div className="profile-page">
         <Navbar active="profile" />
-        <p className="status-text error-text">{loadError}</p>
+        <div className="profile-error">
+          <p style={{ color: "var(--red)" }}>{loadError}</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="profile-page">
-
       <Navbar active="profile" />
 
       <div className="profile-container">
-
-        <div className="profile-header">
-          <p className="small-text">YOUR ACCOUNT</p>
-          <h1>Profile</h1>
-        </div>
-
-        {/* ACCOUNT OVERVIEW */}
-        <div className="account-card">
-          <div className="avatar-circle">
+        {/* ── HERO ── */}
+        <div className="prof-hero">
+          <div className="prof-avatar">
             {user.name?.charAt(0).toUpperCase()}
           </div>
-
-          <div className="account-info">
-            <p className="account-name">{user.name}</p>
-            <p className="account-email">{user.email}</p>
-            <p className="account-since">Member since {formatDate(user.createdAt)}</p>
+          <div className="prof-info">
+            <p className="prof-name">{user.name}</p>
+            <p className="prof-email">{user.email}</p>
+            <p className="prof-since">Member since {formatDate(user.createdAt)}</p>
           </div>
         </div>
 
-        {/* STATS OVERVIEW */}
+        {/* ── STATS ── */}
         {stats && (
-          <div className="stats-grid">
-            <div className="stat-card">
-              <span className="stat-value">{stats.totalSubmissions}</span>
-              <span className="stat-label">Total Submissions</span>
+          <div className="prof-stats-grid">
+            <div className="prof-stat">
+              <span className="prof-stat-val">{stats.totalSubmissions}</span>
+              <span className="prof-stat-lbl">Total Submissions</span>
             </div>
-            <div className="stat-card">
-              <span className="stat-value accepted-text">{stats.solvedProblems}</span>
-              <span className="stat-label">Problems Solved</span>
+            <div className="prof-stat">
+              <span className="prof-stat-val green">{stats.solvedProblems}</span>
+              <span className="prof-stat-lbl">Problems Solved</span>
             </div>
-            <div className="stat-card">
-              <span className="stat-value">{stats.acceptanceRate}%</span>
-              <span className="stat-label">Acceptance Rate</span>
+            <div className="prof-stat">
+              <span className="prof-stat-val orange">{stats.acceptanceRate}%</span>
+              <span className="prof-stat-lbl">Acceptance Rate</span>
             </div>
           </div>
         )}
 
-        {/* RECENT SUBMISSIONS */}
+        {/* ── RECENT ACTIVITY ── */}
         {stats?.recentSubmissions?.length > 0 && (
-          <div className="section-block">
-            <p className="section-title">Recent Activity</p>
-
+          <div className="prof-section">
+            <div className="prof-section-header">
+              <span className="prof-section-title">Recent Activity</span>
+            </div>
             <div className="recent-list">
               {stats.recentSubmissions.map((sub) => (
                 <div
@@ -201,9 +172,9 @@ function Profile() {
                   onClick={() => navigate(`/problems/${sub.problem._id}`)}
                 >
                   <span className="recent-title">{sub.problem.title}</span>
-                  <span className="recent-date">{formatShortDate(sub.createdAt)}</span>
+                  <span className="recent-date">{formatShort(sub.createdAt)}</span>
                   <span className={`recent-status ${sub.status}`}>
-                    {STATUS_LABELS[sub.status] || sub.status}
+                    {STATUS_LABELS[sub.status] ?? sub.status}
                   </span>
                 </div>
               ))}
@@ -211,60 +182,66 @@ function Profile() {
           </div>
         )}
 
-        {/* EDIT NAME */}
-        <div className="section-block">
-          <p className="section-title">Edit Name</p>
+        {/* ── SETTINGS ── */}
+        <div className="prof-settings-grid">
+          {/* Edit Name */}
+          <div className="settings-card">
+            <div className="settings-card-header">
+              <p className="settings-card-title">Edit Display Name</p>
+              <p className="settings-card-sub">Update how your name appears on CodeForge</p>
+            </div>
+            <form className="settings-form" onSubmit={handleNameSubmit}>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                required
+              />
+              <button type="submit" className="settings-btn" disabled={nameSaving}>
+                {nameSaving ? "Saving..." : "Save Name"}
+              </button>
+              {nameSuccess && <p className="settings-msg success">{nameSuccess}</p>}
+              {nameError   && <p className="settings-msg error">{nameError}</p>}
+            </form>
+          </div>
 
-          <form className="settings-form" onSubmit={handleNameSubmit}>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-            />
-
-            <button type="submit" disabled={nameSaving}>
-              {nameSaving ? "Saving..." : "Save"}
-            </button>
-          </form>
-
-          {nameSuccess && <p className="form-success">{nameSuccess}</p>}
-          {nameError && <p className="form-error">{nameError}</p>}
+          {/* Change Password */}
+          <div className="settings-card">
+            <div className="settings-card-header">
+              <p className="settings-card-title">Change Password</p>
+              <p className="settings-card-sub">Use a strong password (min. 8 characters)</p>
+            </div>
+            <form className="settings-form" onSubmit={handlePasswordSubmit}>
+              <input
+                type="password"
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                placeholder="Current password"
+                required
+              />
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="New password"
+                required
+              />
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                required
+              />
+              <button type="submit" className="settings-btn" disabled={passwordSaving}>
+                {passwordSaving ? "Updating..." : "Update Password"}
+              </button>
+              {passwordSuccess && <p className="settings-msg success">{passwordSuccess}</p>}
+              {passwordError   && <p className="settings-msg error">{passwordError}</p>}
+            </form>
+          </div>
         </div>
-
-        {/* CHANGE PASSWORD */}
-        <div className="section-block">
-          <p className="section-title">Change Password</p>
-
-          <form className="settings-form column" onSubmit={handlePasswordSubmit}>
-            <input
-              type="password"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              placeholder="Current password"
-            />
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="New password (min 8 characters)"
-            />
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm new password"
-            />
-
-            <button type="submit" disabled={passwordSaving}>
-              {passwordSaving ? "Updating..." : "Update Password"}
-            </button>
-          </form>
-
-          {passwordSuccess && <p className="form-success">{passwordSuccess}</p>}
-          {passwordError && <p className="form-error">{passwordError}</p>}
-        </div>
-
       </div>
     </div>
   );
