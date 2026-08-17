@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ProblemList from "./pages/ProblemList";
 import ProblemDetail from "./pages/ProblemDetail";
+import Submissions from "./pages/Submissions";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -39,6 +40,15 @@ function App() {
           element={
             <ProtectedRoute>
               <ProblemDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/submissions"
+          element={
+            <ProtectedRoute>
+              <Submissions />
             </ProtectedRoute>
           }
         />

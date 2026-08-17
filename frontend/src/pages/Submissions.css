@@ -2,7 +2,7 @@
   box-sizing: border-box;
 }
 
-.problems-page {
+.submissions-page {
   width: 100%;
   min-height: 100vh;
 
@@ -15,14 +15,14 @@
    CONTAINER
 ========================= */
 
-.problems-container {
+.submissions-container {
   max-width: 900px;
   margin: 0 auto;
 
   padding: 40px 24px 70px;
 }
 
-.problems-header {
+.submissions-header {
   margin-bottom: 28px;
 }
 
@@ -37,7 +37,7 @@
   color: #64748b;
 }
 
-.problems-header h1 {
+.submissions-header h1 {
   margin: 0;
 
   font-size: 38px;
@@ -48,88 +48,73 @@
 
 
 /* =========================
-   FILTER BAR
+   STATS GRID
 ========================= */
 
-.filter-bar {
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 16px;
+
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+
+  padding: 20px;
+
+  border-radius: 18px;
+
+  background: #cbd5e1;
+
+  box-shadow:
+    8px 8px 16px #aab4c3,
+    -8px -8px 16px #e5ebf3;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 900;
+
+  color: #1e293b;
+}
+
+.stat-value.accepted-text {
+  color: #16a34a;
+}
+
+.stat-value.failed-text {
+  color: #dc2626;
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 700;
+
+  color: #64748b;
+}
+
+
+/* =========================
+   STATUS FILTERS
+========================= */
+
+.status-filters {
   display: flex;
   flex-wrap: wrap;
 
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 16px;
+  gap: 10px;
 
   margin-bottom: 28px;
 }
 
-.search-form {
-  display: flex;
-
-  flex: 1;
-  min-width: 240px;
-
-  gap: 10px;
-}
-
-.search-form input {
-  flex: 1;
-
-  padding: 12px 18px;
-
-  border: none;
-  outline: none;
-
-  border-radius: 14px;
-
-  background: #cbd5e1;
-
-  color: #1e293b;
-
-  font-size: 14px;
-
-  box-shadow:
-    inset 5px 5px 10px #aab4c3,
-    inset -5px -5px 10px #e5ebf3;
-}
-
-.search-form input::placeholder {
-  color: #64748b;
-}
-
-.search-form button {
-  padding: 12px 20px;
-
-  border: none;
-  border-radius: 14px;
-
-  background: #cbd5e1;
-
-  color: #1e293b;
-
-  font-size: 13px;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  box-shadow:
-    5px 5px 10px #aab4c3,
-    -5px -5px 10px #e5ebf3;
-
-  transition: 0.2s ease;
-}
-
-.search-form button:hover {
-  transform: translateY(-1px);
-}
-
-.difficulty-filters {
-  display: flex;
-  gap: 10px;
-}
-
 .filter-chip {
-  padding: 10px 18px;
+  padding: 9px 16px;
 
   border: none;
   border-radius: 14px;
@@ -138,9 +123,8 @@
 
   color: #475569;
 
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  text-transform: capitalize;
 
   cursor: pointer;
 
@@ -161,18 +145,6 @@
   box-shadow:
     inset 4px 4px 8px #aab4c3,
     inset -4px -4px 8px #e5ebf3;
-}
-
-.filter-chip.active.easy {
-  color: #16a34a;
-}
-
-.filter-chip.active.medium {
-  color: #d97706;
-}
-
-.filter-chip.active.hard {
-  color: #dc2626;
 }
 
 
@@ -197,17 +169,17 @@
 
 
 /* =========================
-   PROBLEM LIST
+   SUBMISSION LIST
 ========================= */
 
-.problem-list {
+.submission-list {
   display: flex;
   flex-direction: column;
 
   gap: 14px;
 }
 
-.problem-card {
+.submission-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -230,72 +202,43 @@
   transition: 0.2s ease;
 }
 
-.problem-card:hover {
+.submission-card:hover {
   transform: translateY(-2px);
 }
 
-.problem-card:active {
+.submission-card:active {
   box-shadow:
     inset 5px 5px 10px #aab4c3,
     inset -5px -5px 10px #e5ebf3;
 }
 
-.problem-main {
+.submission-main {
   display: flex;
   align-items: center;
 
   gap: 14px;
 }
 
-.problem-number {
+.submission-problem-number {
   font-size: 13px;
   font-weight: 700;
 
   color: #64748b;
 }
 
-.problem-title {
+.submission-title {
   font-size: 16px;
   font-weight: 700;
 
   color: #1e293b;
 }
 
-.problem-meta {
-  display: flex;
-  align-items: center;
-
-  gap: 16px;
-}
-
-.problem-tags {
-  display: flex;
-  gap: 8px;
-}
-
-.tag-chip {
-  padding: 4px 12px;
+.difficulty-badge {
+  padding: 4px 14px;
 
   border-radius: 10px;
 
-  background: #cbd5e1;
-
-  color: #334155;
-
   font-size: 11px;
-  font-weight: 700;
-
-  box-shadow:
-    inset 3px 3px 6px #aab4c3,
-    inset -3px -3px 6px #e5ebf3;
-}
-
-.difficulty-badge {
-  padding: 5px 16px;
-
-  border-radius: 12px;
-
-  font-size: 12px;
   font-weight: 800;
   text-transform: capitalize;
 
@@ -316,6 +259,56 @@
 
 .difficulty-badge.hard {
   color: #dc2626;
+}
+
+.submission-meta {
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+}
+
+.submission-date {
+  font-size: 12px;
+  font-weight: 600;
+
+  color: #64748b;
+}
+
+.submission-tests {
+  font-size: 12px;
+  font-weight: 700;
+
+  color: #334155;
+}
+
+.submission-status {
+  padding: 5px 14px;
+
+  border-radius: 12px;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  background: #cbd5e1;
+
+  box-shadow:
+    3px 3px 6px #aab4c3,
+    -3px -3px 6px #e5ebf3;
+}
+
+.submission-status.accepted {
+  color: #16a34a;
+}
+
+.submission-status.wrong_answer,
+.submission-status.runtime_error,
+.submission-status.compile_error {
+  color: #dc2626;
+}
+
+.submission-status.time_limit_exceeded {
+  color: #d97706;
 }
 
 
@@ -382,25 +375,20 @@
 
 @media (max-width: 700px) {
 
-  .problems-header h1 {
+  .submissions-header h1 {
     font-size: 30px;
   }
 
-  .filter-bar {
-    flex-direction: column;
-    align-items: stretch;
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .difficulty-filters {
-    justify-content: space-between;
-  }
-
-  .problem-card {
+  .submission-card {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .problem-meta {
+  .submission-meta {
     width: 100%;
     justify-content: space-between;
   }

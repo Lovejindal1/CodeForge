@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ProblemList.css";
 import { getProblems } from "../services/problemService";
+import Navbar from "../components/Navbar";
 
 const DIFFICULTIES = ["all", "easy", "medium", "hard"];
 
@@ -56,30 +57,11 @@ function ProblemList() {
     setPage(1);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
-
   return (
     <div className="problems-page">
 
       {/* NAVBAR */}
-      <nav className="navbar">
-        <div className="nav-logo">
-          <div className="logo-symbol">&lt;/&gt;</div>
-          <span>CodeForge</span>
-        </div>
-
-        <div className="nav-links">
-          <span className="nav-link active">Problems</span>
-          <span className="nav-link">Submissions</span>
-        </div>
-
-        <button className="logout-button" onClick={handleLogout}>
-          Logout
-        </button>
-      </nav>
+      <Navbar active="problems" />
 
       <div className="problems-container">
 

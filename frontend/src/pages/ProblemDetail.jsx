@@ -200,25 +200,71 @@ function ProblemDetail() {
 
             {result && (
               <div className="result-content">
-                <span className={`result-status ${result.status}`}>
-                  {STATUS_LABELS[result.status] || result.status}
-                </span>
 
-                <span className="result-tests">
-                  {result.passedTests}/{result.totalTests} test cases passed
-                </span>
+                <div className="result-summary">
+                  <span className={`result-status ${result.status}`}>
+                    {STATUS_LABELS[result.status] || result.status}
+                  </span>
 
-                {result.runtime != null && (
-                  <span className="result-meta">Runtime: {result.runtime}ms</span>
+                  <span className="result-tests">
+                    {result.passedTests}/{result.totalTests} test cases passed
+                  </span>
+
+                  {result.runtime != null && (
+                    <span className="result-meta">Runtime: {result.runtime}ms</span>
+                  )}
+
+                  {result.memory != null && result.memory > 0 && (
+                    <span className="result-meta">Memory: {result.memory}KB</span>
+                  )}
+                </div>
+
+                {result.sampleResults?.length > 0 && (
+                  <div className="testcase-list">
+                    {result.sampleResults.map((tc) => (
+                      <div key={tc.index} className="testcase-row passed">
+                        <div className="testcase-row-header">
+                          <span className="testcase-badge passed">
+                            ✓ Test {tc.index}
+                          </span>
+                          <span className="testcase-status">Accepted</span>
+                        </div>
+
+                        <div className="testcase-details">
+                          <p><span className="tc-label">Input:</span> {tc.input}</p>
+                          <p><span className="tc-label">Expected:</span> {tc.expectedOutput}</p>
+                          <p><span className="tc-label">Got:</span> {tc.actualOutput}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
 
-                {result.memory != null && result.memory > 0 && (
-                  <span className="result-meta">Memory: {result.memory}KB</span>
+                {result.failedCase && (
+                  <div className="testcase-row failed">
+                    <div className="testcase-row-header">
+                      <span className="testcase-badge failed">
+                        ✗ Test {result.failedCase.index}
+                        {result.failedCase.isHidden ? " (Hidden)" : ""}
+                      </span>
+                      <span className="testcase-status">
+                        {STATUS_LABELS[result.failedCase.status] || result.failedCase.status}
+                      </span>
+                    </div>
+
+                    <div className="testcase-details">
+                      <p><span className="tc-label">Input:</span> {result.failedCase.input}</p>
+                      <p><span className="tc-label">Expected:</span> {result.failedCase.expectedOutput}</p>
+                      {result.failedCase.actualOutput !== null && (
+                        <p><span className="tc-label">Got:</span> {result.failedCase.actualOutput}</p>
+                      )}
+                      {result.failedCase.error && (
+                        <pre className="result-error">{result.failedCase.error}</pre>
+                      )}
+                    </div>
+                  </div>
                 )}
 
-                {result.error && (
-                  <pre className="result-error">{result.error}</pre>
-                )}
               </div>
             )}
 

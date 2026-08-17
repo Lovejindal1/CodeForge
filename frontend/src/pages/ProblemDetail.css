@@ -426,7 +426,7 @@
     inset -5px -5px 10px #e5ebf3;
 
   overflow-y: auto;
-  max-height: 220px;
+  max-height: 320px;
 }
 
 .status-text {
@@ -445,6 +445,13 @@
 }
 
 .result-content {
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+}
+
+.result-summary {
   display: flex;
   flex-wrap: wrap;
 
@@ -494,6 +501,90 @@
   font-weight: 600;
 
   color: #64748b;
+}
+
+
+/* PER TEST CASE BREAKDOWN */
+
+.testcase-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.testcase-row {
+  padding: 12px 16px;
+
+  border-radius: 12px;
+
+  background: #cbd5e1;
+
+  box-shadow:
+    3px 3px 6px #aab4c3,
+    -3px -3px 6px #e5ebf3;
+}
+
+.testcase-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 6px;
+}
+
+.testcase-badge {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.testcase-badge.passed {
+  color: #16a34a;
+}
+
+.testcase-badge.failed {
+  color: #dc2626;
+}
+
+.testcase-status {
+  font-size: 11px;
+  font-weight: 700;
+
+  color: #64748b;
+}
+
+.testcase-hidden {
+  margin: 0;
+
+  font-size: 12px;
+  font-style: italic;
+
+  color: #64748b;
+}
+
+.testcase-details p {
+  margin: 0 0 4px;
+
+  font-size: 12px;
+  line-height: 1.6;
+
+  color: #334155;
+
+  font-family: "Courier New", monospace;
+
+  word-break: break-word;
+}
+
+.testcase-details p:last-child {
+  margin-bottom: 0;
+}
+
+.tc-label {
+  font-weight: 700;
+
+  color: #1e293b;
+
+  font-family: inherit;
 }
 
 .result-error {
