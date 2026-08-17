@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ProblemList from "./pages/ProblemList";
+import ProblemDetail from "./pages/ProblemDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -29,6 +30,15 @@ function App() {
           element={
             <ProtectedRoute>
               <ProblemList />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/problems/:id"
+          element={
+            <ProtectedRoute>
+              <ProblemDetail />
             </ProtectedRoute>
           }
         />
