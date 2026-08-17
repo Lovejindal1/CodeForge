@@ -43,9 +43,17 @@ const judgeSubmission = async (submissionId, userId) => {
     let totalRuntime = 0;
     let maxMemory = 0;
 
+    const sampleResults = [];
+
+    let failedCase = null;
+
+    let overallStatus = "accepted";
+    let overallError = null;
+
     for (let i = 0; i < result.results.length; i++) {
 
         const testResult = result.results[i];
+        const testCase = testCases[i];
 
         totalRuntime += testResult.runtime || 0;
 
@@ -53,43 +61,84 @@ const judgeSubmission = async (submissionId, userId) => {
             maxMemory = Math.max(maxMemory, testResult.memory);
         }
 
+        // Execution itself failed (compile/runtime/timeout) — stop here
         if (testResult.status !== "success") {
 
-            await submissionRepository.updateById(
-                submissionId, {
-                    status: testResult.status, passedTests, totalTests: testCases.length, runtime: totalRuntime, memory: maxMemory, error: testResult.error
-                }
-            );
+            overallStatus = testResult.status;
+            overallError = testResult.error;
 
-            return {
-                submissionId, status: testResult.status, passedTests, totalTests: testCases.length, runtime: totalRuntime, memory: maxMemory, error: testResult.error
+            failedCase = {
+                index: i + 1,
+                isHidden: testCase.isHidden,
+                status: testResult.status,
+                input: testCase.input,
+                expectedOutput: testCase.expectedOutput,
+                actualOutput: null,
+                error: testResult.error,
+                runtime: testResult.runtime || 0
             };
+
+            break;
         }
 
         const actualOutput = testResult.output.trim();
-
-        const expectedOutput = testCases[i].expectedOutput.trim();
+        const expectedOutput = testCase.expectedOutput.trim();
 
         if (actualOutput !== expectedOutput) {
 
             const error = `Expected: ${expectedOutput}, Received: ${actualOutput}`;
 
-            await submissionRepository.updateById(
-                submissionId, {
-                    status: "wrong_answer", passedTests, totalTests: testCases.length, runtime: totalRuntime, memory: maxMemory, error
-                }
-            );
-            return {
-                submissionId, status: "wrong_answer", passedTests, totalTests: testCases.length, runtime: totalRuntime, memory: maxMemory, error
+            overallStatus = "wrong_answer";
+            overallError = error;
+
+            failedCase = {
+                index: i + 1,
+                isHidden: testCase.isHidden,
+                status: "wrong_answer",
+                input: testCase.input,
+                expectedOutput,
+                actualOutput,
+                error: null,
+                runtime: testResult.runtime || 0
             };
+
+            break;
         }
+
+        // Passed — only surface details for non-hidden tests, hidden ones just count
         passedTests++;
+
+        if (!testCase.isHidden) {
+            sampleResults.push({
+                index: i + 1,
+                status: "accepted",
+                input: testCase.input,
+                expectedOutput,
+                actualOutput,
+                runtime: testResult.runtime || 0
+            });
+        }
     }
 
-    await submissionRepository.updateById(submissionId, { status: "accepted", passedTests, totalTests: testCases.length, runtime: totalRuntime, memory: maxMemory, error: null });
+    await submissionRepository.updateById(submissionId, {
+        status: overallStatus,
+        passedTests,
+        totalTests: testCases.length,
+        runtime: totalRuntime,
+        memory: maxMemory,
+        error: overallError
+    });
 
     return {
-        submissionId, status: "accepted", passedTests, totalTests: testCases.length, runtime: totalRuntime, memory: maxMemory, error: null
+        submissionId,
+        status: overallStatus,
+        passedTests,
+        totalTests: testCases.length,
+        runtime: totalRuntime,
+        memory: maxMemory,
+        error: overallError,
+        sampleResults,
+        failedCase
     };
 };
 
