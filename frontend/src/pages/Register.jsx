@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Register.css";
 import { registerUser } from "../services/authService";
 
 function Register() {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,11 +29,15 @@ function Register() {
 
       console.log("Register Response:", data);
 
-      setSuccess("Account created successfully!");
+      setSuccess("Account created successfully! Redirecting to login...");
 
       setName("");
       setEmail("");
       setPassword("");
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1200);
     } catch (error) {
       console.error("Register Error:", error);
 
@@ -232,7 +238,10 @@ function Register() {
 
           <p className="login-text">
             Already have an account?
-            <span> Sign In</span>
+            <span
+              onClick={() => navigate("/login")}
+              style={{ cursor: "pointer" }}
+            > Sign In</span>
           </p>
 
         </div>

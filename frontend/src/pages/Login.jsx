@@ -27,6 +27,10 @@ function Login() {
             localStorage.setItem("token", data.data.token);
 
             setSuccess("Login successful!");
+
+            setTimeout(() => {
+                navigate("/dashboard");
+            }, 800);
         } catch (error) {
             console.error("Login Error:", error);
 
@@ -278,7 +282,10 @@ function Login() {
 
                 Don't have an account?
 
-                <span>
+                <span
+                onClick={() => navigate("/register")}
+                style={{ cursor: "pointer" }}
+                >
                 {" "}Create Account
                 </span>
 
