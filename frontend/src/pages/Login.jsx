@@ -29,7 +29,7 @@ function Login() {
             setSuccess("Login successful!");
 
             setTimeout(() => {
-                navigate("/dashboard");
+                navigate("/problems");
             }, 800);
         } catch (error) {
             console.error("Login Error:", error);

@@ -29,6 +29,12 @@ function Navbar({ active }) {
         >
           Submissions
         </span>
+        <span
+          className={`nav-link ${active === "profile" ? "active" : ""}`}
+          onClick={() => navigate("/profile")}
+        >
+          Profile
+        </span>
       </div>
 
       <button className="logout-button" onClick={handleLogout}>
