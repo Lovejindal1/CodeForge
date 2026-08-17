@@ -1,6 +1,48 @@
+import { useState } from "react";
 import "./Register.css";
+import { registerUser } from "../services/authService";
 
 function Register() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+    const handleRegister = async (e) => {
+    e.preventDefault();
+
+    setError("");
+    setSuccess("");
+    setLoading(true);
+
+    try {
+      const data = await registerUser({
+        name,
+        email,
+        password,
+      });
+
+      console.log("Register Response:", data);
+
+      setSuccess("Account created successfully!");
+
+      setName("");
+      setEmail("");
+      setPassword("");
+    } catch (error) {
+      console.error("Register Error:", error);
+
+      setError(
+        error.response?.data?.message ||
+        "Registration failed. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="auth-page">
 
@@ -110,7 +152,7 @@ function Register() {
           </p>
 
 
-          <form>
+          <form onSubmit={handleRegister}>
 
             <div className="input-group">
               <label>Name</label>
@@ -118,7 +160,10 @@ function Register() {
               <input
                 type="text"
                 placeholder="Enter your name"
-              />
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                />
             </div>
 
 
@@ -128,7 +173,10 @@ function Register() {
               <input
                 type="email"
                 placeholder="Enter your email"
-              />
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                />
             </div>
 
 
@@ -138,7 +186,10 @@ function Register() {
               <input
                 type="password"
                 placeholder="Create a password"
-              />
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                />
             </div>
 
 
@@ -152,12 +203,23 @@ function Register() {
 
 
             <button
-              type="submit"
-              className="register-button"
-            >
-              Create Account
+                type="submit"
+                className="register-button"
+                disabled={loading}
+                >
+                {loading ? "Creating Account..." : "Create Account"}
             </button>
+            {error && (
+                <p style={{ color: "#dc2626", marginTop: "15px" }}>
+                    {error}
+                </p>
+                )}
 
+                {success && (
+                <p style={{ color: "#16a34a", marginTop: "15px" }}>
+                    {success}
+                </p>
+            )}
           </form>
 
 
