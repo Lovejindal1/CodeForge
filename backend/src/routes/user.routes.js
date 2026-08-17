@@ -7,6 +7,8 @@ const router = express.Router();
 
 router.get("/me", authMiddleware, userController.getCurrentUser);
 
+router.get("/dashboard", authMiddleware, userController.getUserDashboard);
+
 router.put("/update-profile", authMiddleware, userController.updateProfile);
 
 router.put("/change-password", authMiddleware, userController.changePassword);

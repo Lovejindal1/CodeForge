@@ -114,7 +114,7 @@ function Login() {
             <div className="input-group">
               <div className="password-label-row">
                 <label htmlFor="login-password">Password</label>
-                <button type="button" className="forgot-link">Forgot password?</button>
+                <button type="button" className="forgot-link"></button>
               </div>
               <input
                 id="login-password"

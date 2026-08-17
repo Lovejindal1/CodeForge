@@ -108,6 +108,37 @@ const getMyStats = async (req, res) => {
     }
 };
 
+const runCode = async (req, res) => {
+    try {
+        const { problem, language = "cpp", code } = req.body;
+        if (!problem) {
+            return res.status(400).json({
+                success: false,
+                message: "Problem ID is required"
+            });
+        }
+        if (!code) {
+            return res.status(400).json({
+                success: false,
+                message: "Code is required"
+            });
+        }
+
+        const result = await judgeService.runCode(problem, language, code);
+
+        res.status(200).json({
+            success: true,
+            message: "Code executed successfully",
+            data: result
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 module.exports = {
-    createSubmission, getSubmissionById, getMySubmissions, getProblemSubmissions, judgeSubmission, getMyStats
+    createSubmission, getSubmissionById, getMySubmissions, getProblemSubmissions, judgeSubmission, getMyStats, runCode
 };

@@ -6,6 +6,7 @@ import ProblemList from "./pages/ProblemList";
 import ProblemDetail from "./pages/ProblemDetail";
 import Submissions from "./pages/Submissions";
 import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -54,6 +55,9 @@ function App() {
         />
 
         <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* 404 Route */}
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
     </BrowserRouter>

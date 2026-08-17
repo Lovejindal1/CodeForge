@@ -69,6 +69,13 @@ const findRecentByUser = async (userId, limit = 5) => {
         .limit(limit);
 };
 
+const findSolvedProblemIdsByUser = async (userId) => {
+    return await Submission.distinct("problem", {
+        user: userId,
+        status: "accepted"
+    });
+};
+
 module.exports = {
-    create, findById, updateById, findByUserAndProblem, countByUserAndProblem, findByFilter, countByFilter, countByUserAndStatus, countSolvedProblems, findRecentByUser, countByUser
+    create, findById, updateById, findByUserAndProblem, countByUserAndProblem, findByFilter, countByFilter, countByUserAndStatus, countSolvedProblems, findRecentByUser, countByUser, findSolvedProblemIdsByUser
 };

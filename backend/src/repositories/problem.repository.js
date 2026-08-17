@@ -31,6 +31,10 @@ const deleteById = async (id) => {
     return await Problem.findByIdAndDelete(id);
 };
 
+const findByIds = async (ids, projection = "difficulty") => {
+    return await Problem.find({ _id: { $in: ids } }, projection);
+};
+
 module.exports = {
-    create, findAll, count, findById, deleteById, updateById
+    create, findAll, count, findById, deleteById, updateById, findByIds
 }

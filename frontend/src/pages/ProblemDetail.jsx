@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./ProblemDetail.css";
 import { getProblemById } from "../services/problemService";
-import { createSubmission, getMySubmissions } from "../services/submissionService";
+import { createSubmission, runCode, getMySubmissions } from "../services/submissionService";
 
 const STATUS_LABELS = {
   accepted: "Accepted",
@@ -25,9 +25,13 @@ function ProblemDetail() {
   const [loadError, setLoadError] = useState("");
 
   const [code, setCode] = useState("");
+  const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null);
-  const [submitError, setSubmitError] = useState("");
+  const [runResult, setRunResult] = useState(null);
+  const [submitResult, setSubmitResult] = useState(null);
+  const [executionMode, setExecutionMode] = useState(null); // 'run' | 'submit' | null
+  const [activeCaseIndex, setActiveCaseIndex] = useState(0);
+  const [execError, setExecError] = useState("");
 
   const [leftTab, setLeftTab] = useState("description");
   const [problemSubs, setProblemSubs] = useState([]);
@@ -90,17 +94,37 @@ function ProblemDetail() {
     }
   };
 
-  /* Submit */
+  /* Run Code (Sample Test Cases only, no submission saved in DB) */
+  const handleRun = async () => {
+    if (running || submitting) return;
+    setRunning(true);
+    setExecError("");
+    setExecutionMode("run");
+    setActiveCaseIndex(0);
+    try {
+      const res = await runCode({ problem: id, language: "cpp", code });
+      setRunResult(res.data);
+    } catch (err) {
+      setExecError(err.response?.data?.message || "Code execution failed. Please try again.");
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  /* Submit (All Test Cases, judged & recorded in DB) */
   const handleSubmit = async () => {
+    if (running || submitting) return;
     setSubmitting(true);
-    setSubmitError("");
-    setResult(null);
+    setExecError("");
+    setExecutionMode("submit");
     try {
       const res = await createSubmission({ problem: id, language: "cpp", code });
-      setResult(res.data);
-      if (leftTab === "submissions") fetchProblemSubs();
+      setSubmitResult(res.data);
+      if (leftTab === "submissions") {
+        fetchProblemSubs();
+      }
     } catch (err) {
-      setSubmitError(err.response?.data?.message || "Submission failed. Please try again.");
+      setExecError(err.response?.data?.message || "Submission failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -108,7 +132,10 @@ function ProblemDetail() {
 
   const formatDate = (d) =>
     new Date(d).toLocaleDateString("en-IN", {
-      day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
     });
 
   const lineCount = code.split("\n").length;
@@ -158,6 +185,8 @@ function ProblemDetail() {
     );
   }
 
+  const currentResult = executionMode === "run" ? runResult : submitResult;
+
   return (
     <div className="dp-page">
       {/* ── TOP BAR ── */}
@@ -184,22 +213,47 @@ function ProblemDetail() {
         </div>
 
         <div className="dp-topbar-right">
-          <button
-            className={`dp-submit-btn ${submitting ? "loading" : ""}`}
-            onClick={handleSubmit}
-            disabled={submitting}
-          >
-            {submitting ? (
-              <><span className="btn-spin" />Judging...</>
-            ) : (
-              <>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <polygon points="5 3 19 12 5 21 5 3"/>
-                </svg>
-                Submit
-              </>
-            )}
-          </button>
+          <div className="dp-actions-group">
+            {/* RUN BUTTON */}
+            <button
+              id="run-code-btn"
+              className={`dp-run-btn ${running ? "loading" : ""}`}
+              onClick={handleRun}
+              disabled={running || submitting}
+              title="Run code on sample test cases"
+            >
+              {running ? (
+                <><span className="btn-spin" />Running...</>
+              ) : (
+                <>
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="6 4 20 12 6 20 6 4"/>
+                  </svg>
+                  Run Code
+                </>
+              )}
+            </button>
+
+            {/* SUBMIT BUTTON */}
+            <button
+              id="submit-code-btn"
+              className={`dp-submit-btn ${submitting ? "loading" : ""}`}
+              onClick={handleSubmit}
+              disabled={running || submitting}
+              title="Submit code for full evaluation"
+            >
+              {submitting ? (
+                <><span className="btn-spin" />Judging...</>
+              ) : (
+                <>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Submit
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -382,61 +436,162 @@ function ProblemDetail() {
           {/* RESULT / CONSOLE PANEL */}
           <div className="dp-console">
             <div className="dp-console-header">
-              <span className="dp-console-title">Console</span>
-              {result && (
-                <span className={`dp-verdict-chip ${result.status}`}>
-                  {result.status === "accepted" ? "✓" : "✗"} {STATUS_LABELS[result.status]}
+              <div className="dp-console-header-left">
+                <span className="dp-console-title">Console</span>
+                {executionMode && (
+                  <span className={`dp-mode-tag ${executionMode}`}>
+                    {executionMode === "run" ? "Run Testcases" : "Submission Verdict"}
+                  </span>
+                )}
+              </div>
+
+              {currentResult && (
+                <span className={`dp-verdict-chip ${currentResult.status}`}>
+                  {currentResult.status === "accepted" ? "✓" : "✗"}{" "}
+                  {STATUS_LABELS[currentResult.status] ?? currentResult.status}
                 </span>
               )}
             </div>
 
             <div className="dp-console-body">
-              {!result && !submitError && !submitting && (
+              {/* PLACEHOLDER */}
+              {!currentResult && !execError && !running && !submitting && (
                 <div className="dp-console-placeholder">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <p>Submit your code to see test results</p>
+                  <p>Click "Run Code" to test sample cases or "Submit" for full evaluation</p>
                 </div>
               )}
 
+              {/* RUNNING STATE */}
+              {running && (
+                <div className="dp-judging">
+                  <div className="judging-dots">
+                    <span /><span /><span />
+                  </div>
+                  <p>Running sample test cases...</p>
+                </div>
+              )}
+
+              {/* SUBMITTING STATE */}
               {submitting && (
                 <div className="dp-judging">
                   <div className="judging-dots">
                     <span /><span /><span />
                   </div>
-                  <p>Judging your submission...</p>
+                  <p>Judging submission against all test cases...</p>
                 </div>
               )}
 
-              {submitError && !submitting && (
+              {/* ERROR STATE */}
+              {execError && !running && !submitting && (
                 <div className="dp-result-error">
                   <span className="result-icon-x">✗</span>
-                  <span>{submitError}</span>
+                  <span>{execError}</span>
                 </div>
               )}
 
-              {result && !submitting && (
+              {/* ── RUN RESULTS (Sample Testcases) ── */}
+              {executionMode === "run" && runResult && !running && (
                 <div className="dp-result-content">
-                  {/* Summary row */}
                   <div className="dp-result-summary">
                     <div className="drs-meta">
                       <span className="drs-tests">
-                        {result.passedTests}/{result.totalTests} test cases passed
+                        {runResult.passedTests}/{runResult.totalTests} sample cases passed
                       </span>
-                      {result.runtime != null && (
-                        <span className="drs-chip">⏱ {result.runtime}ms</span>
+                      {runResult.runtime != null && (
+                        <span className="drs-chip">⏱ {runResult.runtime}ms</span>
                       )}
-                      {result.memory != null && result.memory > 0 && (
-                        <span className="drs-chip">💾 {result.memory}KB</span>
+                      {runResult.memory != null && runResult.memory > 0 && (
+                        <span className="drs-chip">💾 {runResult.memory}KB</span>
                       )}
                     </div>
                   </div>
 
-                  {/* Passed test cases */}
-                  {result.sampleResults?.length > 0 && (
+                  {/* Compile/Execution Error */}
+                  {runResult.error && runResult.results?.length === 0 && (
+                    <div className="dp-tc failed">
+                      <div className="dp-tc-header">
+                        <span className="dp-tc-num">Execution Error</span>
+                      </div>
+                      <div className="dp-tc-body">
+                        <pre className="dp-error-pre">{runResult.error}</pre>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Case Switcher Tabs */}
+                  {runResult.results?.length > 0 && (
+                    <div className="dp-run-container">
+                      <div className="dp-case-tabs">
+                        {runResult.results.map((tc, idx) => (
+                          <button
+                            key={idx}
+                            className={`dp-case-tab ${activeCaseIndex === idx ? "active" : ""} ${tc.status === "accepted" ? "pass" : "fail"}`}
+                            onClick={() => setActiveCaseIndex(idx)}
+                          >
+                            <span className={`case-indicator ${tc.status === "accepted" ? "pass" : "fail"}`}>
+                              {tc.status === "accepted" ? "✓" : "✗"}
+                            </span>
+                            Case {idx + 1}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Selected Case Content */}
+                      {runResult.results[activeCaseIndex] && (
+                        <div className="dp-case-detail">
+                          <div className="dp-tc-row">
+                            <span className="tc-k">Input</span>
+                            <code>{runResult.results[activeCaseIndex].input}</code>
+                          </div>
+                          <div className="dp-tc-row">
+                            <span className="tc-k">Expected</span>
+                            <code>{runResult.results[activeCaseIndex].expectedOutput}</code>
+                          </div>
+                          {runResult.results[activeCaseIndex].actualOutput !== null && (
+                            <div className="dp-tc-row">
+                              <span className="tc-k">Actual Output</span>
+                              <code className={runResult.results[activeCaseIndex].status === "accepted" ? "correct" : "wrong"}>
+                                {runResult.results[activeCaseIndex].actualOutput}
+                              </code>
+                            </div>
+                          )}
+                          {runResult.results[activeCaseIndex].error && (
+                            <div className="dp-tc-row">
+                              <span className="tc-k">Error</span>
+                              <pre className="dp-error-pre">{runResult.results[activeCaseIndex].error}</pre>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── SUBMIT RESULTS (Full Suite) ── */}
+              {executionMode === "submit" && submitResult && !submitting && (
+                <div className="dp-result-content">
+                  <div className="dp-result-summary">
+                    <div className="drs-meta">
+                      <span className="drs-tests">
+                        {submitResult.passedTests}/{submitResult.totalTests} test cases passed
+                      </span>
+                      {submitResult.runtime != null && (
+                        <span className="drs-chip">⏱ {submitResult.runtime}ms</span>
+                      )}
+                      {submitResult.memory != null && submitResult.memory > 0 && (
+                        <span className="drs-chip">💾 {submitResult.memory}KB</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Sample passed list */}
+                  {submitResult.sampleResults?.length > 0 && (
                     <div className="dp-testcases">
-                      {result.sampleResults.map((tc) => (
+                      {submitResult.sampleResults.map((tc) => (
                         <div key={tc.index} className="dp-tc passed">
                           <div className="dp-tc-header">
                             <span className="dp-tc-num">✓ Case {tc.index}</span>
@@ -453,25 +608,25 @@ function ProblemDetail() {
                   )}
 
                   {/* Failed case */}
-                  {result.failedCase && (
+                  {submitResult.failedCase && (
                     <div className="dp-tc failed">
                       <div className="dp-tc-header">
                         <span className="dp-tc-num">
-                          ✗ Case {result.failedCase.index}
-                          {result.failedCase.isHidden ? " (Hidden)" : ""}
+                          ✗ Case {submitResult.failedCase.index}
+                          {submitResult.failedCase.isHidden ? " (Hidden Testcase)" : ""}
                         </span>
                         <span className="dp-tc-verdict failed">
-                          {STATUS_LABELS[result.failedCase.status] ?? result.failedCase.status}
+                          {STATUS_LABELS[submitResult.failedCase.status] ?? submitResult.failedCase.status}
                         </span>
                       </div>
                       <div className="dp-tc-body">
-                        <div className="dp-tc-row"><span className="tc-k">Input</span><code>{result.failedCase.input}</code></div>
-                        <div className="dp-tc-row"><span className="tc-k">Expected</span><code>{result.failedCase.expectedOutput}</code></div>
-                        {result.failedCase.actualOutput !== null && (
-                          <div className="dp-tc-row"><span className="tc-k">Got</span><code className="wrong">{result.failedCase.actualOutput}</code></div>
+                        <div className="dp-tc-row"><span className="tc-k">Input</span><code>{submitResult.failedCase.input}</code></div>
+                        <div className="dp-tc-row"><span className="tc-k">Expected</span><code>{submitResult.failedCase.expectedOutput}</code></div>
+                        {submitResult.failedCase.actualOutput !== null && (
+                          <div className="dp-tc-row"><span className="tc-k">Got</span><code className="wrong">{submitResult.failedCase.actualOutput}</code></div>
                         )}
-                        {result.failedCase.error && (
-                          <pre className="dp-error-pre">{result.failedCase.error}</pre>
+                        {submitResult.failedCase.error && (
+                          <pre className="dp-error-pre">{submitResult.failedCase.error}</pre>
                         )}
                       </div>
                     </div>

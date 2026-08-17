@@ -50,6 +50,22 @@ const changePassword = async (req, res) =>{
     }
 }
 
+const getUserDashboard = async (req, res) => {
+    try {
+        const dashboardData = await userService.getUserDashboard(req.user.id);
+        res.status(200).json({
+            success: true,
+            message: "User dashboard data fetched successfully",
+            data: dashboardData
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 module.exports={ 
-    getCurrentUser, updateProfile, changePassword
+    getCurrentUser, updateProfile, changePassword, getUserDashboard
 }
