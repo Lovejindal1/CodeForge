@@ -15,6 +15,7 @@ const register = async (userData) =>{
 
     userData.password = hashPassword;
     const user = await userRepository.create(userData);
+    user.password = undefined;
     return user;
 }
 

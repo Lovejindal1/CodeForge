@@ -20,7 +20,7 @@ const updateProfile = async (id, data) => {
 }
 
 const updatePassword = async (id, hashPassword) => {
-    return await User.findById(id, {password: hashPassword}, {new: true});
+    return await User.findByIdAndUpdate(id, {password: hashPassword}, {new: true});
 }
 
 module.exports = {

@@ -2,12 +2,13 @@ const express = require("express");
 
 const {authMiddleware} = require("../middlewares/auth.middleware");
 const submissionController = require("../controllers/submission.controller");
+const { submissionLimiter } = require("../middlewares/rateLimiter.middleware");
 
 const router = express.Router();
 
-router.post("/", authMiddleware, submissionController.createSubmission);
+router.post("/", authMiddleware,submissionLimiter, submissionController.createSubmission);
 
-router.post("/run", authMiddleware, submissionController.runCode);
+router.post("/run", authMiddleware,submissionLimiter, submissionController.runCode);
 
 router.get("/my/stats", authMiddleware, submissionController.getMyStats);
 

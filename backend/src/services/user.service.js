@@ -26,7 +26,7 @@ const updateProfile = async (userId, userData) =>{
             name: userData.name
         }
     );
-    if(!updateProfile){
+    if(!updatedUser){
         throw new Error("User not found");
     }
     return updatedUser;
