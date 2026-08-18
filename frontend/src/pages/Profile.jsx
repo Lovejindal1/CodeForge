@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Profile.css";
 import { getUserDashboard, updateProfile, changePassword } from "../services/userService";
+import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 
 const STATUS_LABELS = {
@@ -16,6 +17,7 @@ const STATUS_LABELS = {
 
 function Profile() {
   const navigate = useNavigate();
+  const { updateUser } = useAuth();   // ← global state updater
 
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -56,16 +58,27 @@ function Profile() {
 
   const handleNameSubmit = async (e) => {
     e.preventDefault();
-    setNameSaving(true);
-    setNameSuccess("");
     setNameError("");
+    setNameSuccess("");
+
+    // Client-side validation
+    const trimmed = name.trim();
+    if (trimmed.length < 3) {
+      setNameError("Name must be at least 3 characters.");
+      return;
+    }
+    if (trimmed.length > 50) {
+      setNameError("Name must be 50 characters or less.");
+      return;
+    }
+
+    setNameSaving(true);
     try {
-      const res = await updateProfile({ name });
+      const res = await updateProfile({ name: trimmed });
+      // Update global AuthContext so Navbar reflects new name immediately
+      updateUser({ name: res.data.name });
       if (dashboard) {
-        setDashboard({
-          ...dashboard,
-          user: { ...dashboard.user, name: res.data.name },
-        });
+        setDashboard({ ...dashboard, user: { ...dashboard.user, name: res.data.name } });
       }
       setNameSuccess("Name updated successfully!");
     } catch (err) {
@@ -79,10 +92,29 @@ function Profile() {
     e.preventDefault();
     setPasswordSuccess("");
     setPasswordError("");
-    if (newPassword !== confirmPassword) {
-      setPasswordError("Passwords do not match.");
+
+    // Client-side validation
+    if (!oldPassword) {
+      setPasswordError("Please enter your current password.");
       return;
     }
+    if (newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters.");
+      return;
+    }
+    if (!/[a-zA-Z]/.test(newPassword)) {
+      setPasswordError("New password must contain at least one letter.");
+      return;
+    }
+    if (!/\d/.test(newPassword)) {
+      setPasswordError("New password must contain at least one number.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match.");
+      return;
+    }
+
     setPasswordSaving(true);
     try {
       await changePassword({ oldPassword, newPassword });
@@ -117,7 +149,7 @@ function Profile() {
   if (loading) {
     return (
       <div className="profile-page">
-        <Navbar active="profile" />
+        <Navbar />
         <div className="profile-loading">
           <div className="spinner" />
           <p>Loading profile dashboard...</p>

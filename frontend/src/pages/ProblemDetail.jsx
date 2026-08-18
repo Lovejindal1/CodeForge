@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./ProblemDetail.css";
-import { getProblemById } from "../services/problemService";
-import { createSubmission, runCode, getMySubmissions } from "../services/submissionService";
+import { getProblemById, getProblems } from "../services/problemService";
+import { createSubmission, runCode, getMySubmissions, getSubmissionById } from "../services/submissionService";
 
 const STATUS_LABELS = {
   accepted: "Accepted",
@@ -37,6 +37,15 @@ function ProblemDetail() {
   const [problemSubs, setProblemSubs] = useState([]);
   const [subsLoading, setSubsLoading] = useState(false);
 
+  /* prev/next problem navigation */
+  const [prevProblemId, setPrevProblemId] = useState(null);
+  const [nextProblemId, setNextProblemId] = useState(null);
+
+  /* submission detail modal */
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [subDetailLoading, setSubDetailLoading] = useState(false);
+  const [subDetailError, setSubDetailError] = useState("");
+
   /* fetch problem */
   useEffect(() => {
     const fetchProblem = async () => {
@@ -55,6 +64,59 @@ function ProblemDetail() {
     fetchProblem();
   }, [id]);
 
+  /* fetch full problem list (sorted by problemNumber) to determine prev/next */
+  useEffect(() => {
+    const fetchNeighbours = async () => {
+      try {
+        const res = await getProblems({ limit: 1000 });
+        const list = res.data?.problems || [];
+        const currentIndex = list.findIndex((p) => p._id === id);
+        if (currentIndex === -1) {
+          setPrevProblemId(null);
+          setNextProblemId(null);
+          return;
+        }
+        setPrevProblemId(currentIndex > 0 ? list[currentIndex - 1]._id : null);
+        setNextProblemId(
+          currentIndex < list.length - 1 ? list[currentIndex + 1]._id : null
+        );
+      } catch {
+        setPrevProblemId(null);
+        setNextProblemId(null);
+      }
+    };
+    fetchNeighbours();
+  }, [id]);
+
+  const goToPrevProblem = () => {
+    if (prevProblemId) navigate(`/problems/${prevProblemId}`);
+  };
+
+  const goToNextProblem = () => {
+    if (nextProblemId) navigate(`/problems/${nextProblemId}`);
+  };
+
+  /* open submission detail modal */
+  const openSubmissionDetail = async (submissionId) => {
+    setSelectedSubmission(null);
+    setSubDetailError("");
+    setSubDetailLoading(true);
+    try {
+      const res = await getSubmissionById(submissionId);
+      setSelectedSubmission(res.data);
+    } catch (err) {
+      setSubDetailError(err.response?.data?.message || "Failed to load submission.");
+    } finally {
+      setSubDetailLoading(false);
+    }
+  };
+
+  const closeSubmissionDetail = () => {
+    setSelectedSubmission(null);
+    setSubDetailError("");
+    setSubDetailLoading(false);
+  };
+
   /* fetch submissions for this problem */
   const fetchProblemSubs = async () => {
     setSubsLoading(true);
@@ -65,7 +127,7 @@ function ProblemDetail() {
         (s) => (s.problem?._id ?? s.problem) === id
       );
       setProblemSubs(filtered);
-    } catch {}
+    } catch { }
     setSubsLoading(false);
   };
 
@@ -130,6 +192,12 @@ function ProblemDetail() {
     }
   };
 
+  /* Reset code back to starter code */
+  const handleResetCode = () => {
+    if (running || submitting) return;
+    setCode(problem?.starterCode || "");
+  };
+
   const formatDate = (d) =>
     new Date(d).toLocaleDateString("en-IN", {
       day: "numeric",
@@ -147,9 +215,9 @@ function ProblemDetail() {
         <div className="dp-topbar">
           <div className="dp-logo" onClick={() => navigate("/problems")}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M8 6L3 12L8 18" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M16 6L21 12L16 18" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M13 4L11 20" strokeLinecap="round"/>
+              <path d="M8 6L3 12L8 18" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M16 6L21 12L16 18" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M13 4L11 20" strokeLinecap="round" />
             </svg>
             <span>CodeForge</span>
           </div>
@@ -168,9 +236,9 @@ function ProblemDetail() {
         <div className="dp-topbar">
           <div className="dp-logo" onClick={() => navigate("/problems")}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M8 6L3 12L8 18" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M16 6L21 12L16 18" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M13 4L11 20" strokeLinecap="round"/>
+              <path d="M8 6L3 12L8 18" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M16 6L21 12L16 18" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M13 4L11 20" strokeLinecap="round" />
             </svg>
             <span>CodeForge</span>
           </div>
@@ -194,9 +262,9 @@ function ProblemDetail() {
         <div className="dp-topbar-left">
           <div className="dp-logo" onClick={() => navigate("/problems")}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M8 6L3 12L8 18" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M16 6L21 12L16 18" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M13 4L11 20" strokeLinecap="round"/>
+              <path d="M8 6L3 12L8 18" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M16 6L21 12L16 18" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M13 4L11 20" strokeLinecap="round" />
             </svg>
             <span>CodeForge</span>
           </div>
@@ -207,9 +275,29 @@ function ProblemDetail() {
         </div>
 
         <div className="dp-topbar-center">
+          <button
+            className="dp-nav-arrow"
+            onClick={goToPrevProblem}
+            disabled={!prevProblemId}
+            title="Previous problem"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="15 18 9 12 15 6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
           <span className="dp-problem-crumb">
             {problem.problemNumber}. {problem.title}
           </span>
+          <button
+            className="dp-nav-arrow"
+            onClick={goToNextProblem}
+            disabled={!nextProblemId}
+            title="Next problem"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="9 18 15 12 9 6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
         </div>
 
         <div className="dp-topbar-right">
@@ -227,7 +315,7 @@ function ProblemDetail() {
               ) : (
                 <>
                   <svg viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="6 4 20 12 6 20 6 4"/>
+                    <polygon points="6 4 20 12 6 20 6 4" />
                   </svg>
                   Run Code
                 </>
@@ -247,7 +335,7 @@ function ProblemDetail() {
               ) : (
                 <>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
+                    <polyline points="20 6 9 17 4 12" />
                   </svg>
                   Submit
                 </>
@@ -357,7 +445,7 @@ function ProblemDetail() {
                 {!subsLoading && problemSubs.length === 0 && (
                   <div className="dp-subs-empty">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     <p>No submissions for this problem yet.</p>
                     <span>Submit your solution to see results here.</span>
@@ -373,7 +461,13 @@ function ProblemDetail() {
                       <span>When</span>
                     </div>
                     {problemSubs.map((sub) => (
-                      <div key={sub._id} className="dp-sub-row">
+                      <div
+                        key={sub._id}
+                        className="dp-sub-row clickable"
+                        onClick={() => openSubmissionDetail(sub._id)}
+                        role="button"
+                        tabIndex={0}
+                      >
                         <span className={`dp-sub-status ${sub.status}`}>
                           {sub.status === "accepted" ? "✓" : "✗"} {STATUS_LABELS[sub.status] ?? sub.status}
                         </span>
@@ -399,14 +493,29 @@ function ProblemDetail() {
           <div className="dp-editor-bar">
             <div className="dp-editor-tabs">
               <div className="dp-editor-tab active">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="file-icon">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                </svg>
+                <span className="dp-file-icon">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11.5L21 17V5a2 2 0 0 0-2-2H5z" fill="#1a4d7a" stroke="#3b82c4" strokeWidth="1" />
+                    <path d="M16.5 21L21 17h-3a2 2 0 0 0-2 2v2z" fill="#3b82c4" />
+                    <text x="12" y="15.5" textAnchor="middle" fontSize="7.5" fontWeight="700" fontFamily="Consolas, monospace" fill="#7ec3ff">cpp</text>
+                  </svg>
+                </span>
                 solution.cpp
               </div>
             </div>
             <div className="dp-editor-right">
+              <button
+                className="dp-reset-btn"
+                onClick={handleResetCode}
+                disabled={running || submitting}
+                title="Reset code to starter template"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M1 4v6h6M23 20v-6h-6" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Reset
+              </button>
               <div className="dp-lang-badge">C++17</div>
             </div>
           </div>
@@ -458,7 +567,7 @@ function ProblemDetail() {
               {!currentResult && !execError && !running && !submitting && (
                 <div className="dp-console-placeholder">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   <p>Click "Run Code" to test sample cases or "Submit" for full evaluation</p>
                 </div>
@@ -637,6 +746,74 @@ function ProblemDetail() {
           </div>
         </div>
       </div>
+
+      {/* ── SUBMISSION DETAIL MODAL ── */}
+      {(subDetailLoading || selectedSubmission || subDetailError) && (
+        <div className="dp-modal-overlay" onClick={closeSubmissionDetail}>
+          <div className="dp-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="dp-modal-header">
+              <span className="dp-modal-title">
+                {selectedSubmission
+                  ? `Submission · ${STATUS_LABELS[selectedSubmission.status] ?? selectedSubmission.status}`
+                  : "Submission"}
+              </span>
+              <button className="dp-modal-close" onClick={closeSubmissionDetail}>✕</button>
+            </div>
+
+            <div className="dp-modal-body">
+              {subDetailLoading && (
+                <div style={{ display: "flex", justifyContent: "center", padding: "40px" }}>
+                  <div className="spinner" />
+                </div>
+              )}
+
+              {!subDetailLoading && subDetailError && (
+                <div className="dp-result-error">
+                  <span className="result-icon-x">✗</span>
+                  <span>{subDetailError}</span>
+                </div>
+              )}
+
+              {!subDetailLoading && selectedSubmission && (
+                <>
+                  <div className="dp-result-summary">
+                    <div className="drs-meta">
+                      <span className={`dp-verdict-chip ${selectedSubmission.status}`}>
+                        {selectedSubmission.status === "accepted" ? "✓" : "✗"}{" "}
+                        {STATUS_LABELS[selectedSubmission.status] ?? selectedSubmission.status}
+                      </span>
+                      <span className="drs-tests">
+                        {selectedSubmission.passedTests}/{selectedSubmission.totalTests} test cases passed
+                      </span>
+                      {selectedSubmission.runtime != null && (
+                        <span className="drs-chip">⏱ {selectedSubmission.runtime}ms</span>
+                      )}
+                      {selectedSubmission.memory != null && selectedSubmission.memory > 0 && (
+                        <span className="drs-chip">💾 {selectedSubmission.memory}KB</span>
+                      )}
+                      <span className="drs-chip">{formatDate(selectedSubmission.createdAt)}</span>
+                    </div>
+                  </div>
+
+                  {selectedSubmission.error && (
+                    <div className="dp-tc failed" style={{ marginTop: 12 }}>
+                      <div className="dp-tc-header">
+                        <span className="dp-tc-num">Error</span>
+                      </div>
+                      <div className="dp-tc-body">
+                        <pre className="dp-error-pre">{selectedSubmission.error}</pre>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="dp-modal-code-label">Submitted Code (C++)</div>
+                  <pre className="dp-modal-code">{selectedSubmission.code}</pre>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

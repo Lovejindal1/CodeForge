@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import { loginUser } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,9 +20,10 @@ function Login() {
     setLoading(true);
     try {
       const data = await loginUser({ email, password });
-      localStorage.setItem("token", data.data.token);
+      // login() stores token in localStorage AND sets global user state
+      login(data.data.token, data.data.user ?? null);
       setSuccess("Login successful! Redirecting...");
-      setTimeout(() => navigate("/problems"), 800);
+      setTimeout(() => navigate("/problems"), 500);
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Please try again.");
     } finally {
@@ -35,9 +38,9 @@ function Login() {
         <div className="brand-logo">
           <div className="logo-icon">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 6L3 12L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M16 6L21 12L16 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M13 4L11 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M8 6L3 12L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M16 6L21 12L16 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M13 4L11 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
           <span className="logo-text">CodeForge</span>
@@ -85,9 +88,9 @@ function Login() {
           <div className="mobile-logo">
             <div className="logo-icon">
               <svg viewBox="0 0 24 24" fill="none">
-                <path d="M8 6L3 12L8 18" stroke="var(--orange)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M16 6L21 12L16 18" stroke="var(--orange)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M13 4L11 20" stroke="var(--orange)" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M8 6L3 12L8 18" stroke="var(--orange)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M16 6L21 12L16 18" stroke="var(--orange)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M13 4L11 20" stroke="var(--orange)" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
             <span>CodeForge</span>
@@ -136,7 +139,7 @@ function Login() {
               {loading ? "Signing In..." : "Sign In"}
             </button>
 
-            {error   && <p className="form-error">{error}</p>}
+            {error && <p className="form-error">{error}</p>}
             {success && <p className="form-success">{success}</p>}
           </form>
 

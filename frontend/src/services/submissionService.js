@@ -20,3 +20,7 @@ export const getMyStats = async () => {
   return response.data;
 };
 
+export const getSubmissionById = async (id) => {
+  const response = await api.get(`/submissions/${id}`);
+  return response.data;
+};
