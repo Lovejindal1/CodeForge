@@ -6,6 +6,7 @@ const userRoutes = require("./user.routes");
 const problemRoutes = require("./problem.routes");
 const submissionRoutes = require("./submission.routes");
 const testcaseRoutes = require("./testcase.routes");
+const contestRoutes = require("./contest.routes");
 
 const router = express.Router();
 
@@ -34,7 +35,6 @@ router.get('/', (req,res)=>{
 //             message: "You are an admin",
 //             user: req.user
 //         });
-
 //     }
 // );
 
@@ -48,5 +48,7 @@ router.use("/problems", problemRoutes);
 router.use("/submissions", submissionRoutes);
 
 router.use("/testcases", testcaseRoutes);
+
+router.use("/contests", contestRoutes);
 
 module.exports=router;
