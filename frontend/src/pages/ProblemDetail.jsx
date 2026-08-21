@@ -47,22 +47,45 @@ function ProblemDetail() {
   const [subDetailError, setSubDetailError] = useState("");
 
   /* fetch problem */
-  useEffect(() => {
+useEffect(() => {
+    let cancelled = false;
+
     const fetchProblem = async () => {
-      setLoading(true);
-      setLoadError("");
-      try {
-        const res = await getProblemById(id);
-        setProblem(res.data);
-        setCode(res.data.starterCode || "");
-      } catch (err) {
-        setLoadError(err.response?.data?.message || "Failed to load problem.");
-      } finally {
-        setLoading(false);
-      }
+        setLoading(true);
+        setLoadError("");
+
+        try {
+            const res = await getProblemById(id);
+
+            if (cancelled) return;
+
+            setProblem(res.data);
+            setCode(res.data.starterCode || "");
+
+        } catch (err) {
+
+            if (cancelled) return;
+
+            setLoadError(
+                err.response?.data?.message ||
+                "Failed to load problem."
+            );
+
+        } finally {
+
+            if (!cancelled) {
+                setLoading(false);
+            }
+        }
     };
+
     fetchProblem();
-  }, [id]);
+
+    return () => {
+        cancelled = true;
+    };
+
+}, [id]);
 
   /* fetch full problem list (sorted by problemNumber) to determine prev/next */
   useEffect(() => {
