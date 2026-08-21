@@ -1,7 +1,19 @@
 const leaderboardRepository = require("../repositories/leaderboard.repository");
+const {getCache, setCache, deleteCache} = require("../utils/cache");
 const ApiError = require("../utils/ApiError");
 
 const getContestLeaderboard = async (contestId) => {
+
+    const cacheKey = `leaderboard:${contestId}`;
+
+    // 1. check redis first
+    const cachedLeaderboard = await getCache(cacheKey);
+    if (cachedLeaderboard) {
+        console.log("Leaderboard Cache HIT:", cacheKey);
+        return cachedLeaderboard;
+    }
+
+    console.log("Leaderboard Cache MISS:", cacheKey);
 
     const contest = await leaderboardRepository.findContestById(contestId);
     if(!contest) throw new ApiError(404, "Contest not found");
@@ -74,6 +86,15 @@ const getContestLeaderboard = async (contestId) => {
     leaderboard.forEach((entry, index) => {
         entry.rank = index + 1;
     });
+
+    // Determine TTL: 24 hours (86400s) if contest has ended (immutable leaderboard), 30s if still running
+    const now = new Date();
+    const isEnded = now > contest.endTime;
+    const ttl = isEnded ? 86400 : 30;
+
+    // 3. Save calculated leaderboard in Redis
+    await setCache(cacheKey, leaderboard, ttl);
+    console.log(`Leaderboard cached: ${cacheKey} (TTL: ${ttl}s, Status: ${isEnded ? "ENDED" : "RUNNING"})`);
 
     return leaderboard;
 }

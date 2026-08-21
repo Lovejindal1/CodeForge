@@ -38,6 +38,15 @@ const isParticipant = async (contestId, userId) => {
     });
 }
 
+const findRunningContestsByProblemAndUser = async (problemId, userId, timestamp = new Date()) => {
+    return await Contest.find({
+        problems: problemId,
+        participants: userId,
+        startTime: { $lte: timestamp },
+        endTime: { $gte: timestamp }
+    }, "_id");
+}
+
 module.exports = {
-    createContest, findAllContests, findContestById, findContestByIdWithoutPopulate, addParticipant, isParticipant
+    createContest, findAllContests, findContestById, findContestByIdWithoutPopulate, addParticipant, isParticipant, findRunningContestsByProblemAndUser
 };

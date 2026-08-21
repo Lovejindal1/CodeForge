@@ -1,6 +1,8 @@
 const submissionRepository = require("../repositories/submission.repository");
 const testcaseRepository = require("../repositories/testcase.repository");
 const problemRepository = require("../repositories/problem.repository");
+const contestRepository = require("../repositories/contest.repository");
+const { deleteCache } = require("../utils/cache");
 
 // const { executeCpp } = require("./executor/cpp.executor");
 const { getExecutor } = require("./executor/executor.factory");
@@ -128,6 +130,24 @@ const judgeSubmission = async (submissionId, userId) => {
         memory: maxMemory,
         error: overallError
     });
+
+    // Invalidate leaderboard cache for any running contest this submission belongs to
+    try {
+        const submissionDate = submission.createdAt || new Date();
+        const runningContests = await contestRepository.findRunningContestsByProblemAndUser(
+            problemId,
+            userId,
+            submissionDate
+        );
+
+        for (const contest of runningContests) {
+            const cacheKey = `leaderboard:${contest._id}`;
+            await deleteCache(cacheKey);
+            console.log("Contest leaderboard cache invalidated:", cacheKey);
+        }
+    } catch (cacheErr) {
+        console.error("Failed to invalidate contest leaderboard cache:", cacheErr.message);
+    }
 
     return {
         submissionId,
