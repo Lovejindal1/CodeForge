@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const { getCache } = require("../utils/cache");
 
-const authMiddleware = (req, res, next) =>{
+const authMiddleware = async (req, res, next) =>{
     try {
         const authHeader = req.headers.authorization;
         if(!authHeader){
@@ -16,8 +17,18 @@ const authMiddleware = (req, res, next) =>{
             });
         }
         const token = authHeader.split(" ")[1];
+
+        // Check if token has been revoked / blacklisted in Redis
+        const isBlacklisted = await getCache(`blacklist:${token}`);
+        if (isBlacklisted) {
+            return res.status(401).json({
+                success: false,
+                message: "Token has been revoked. Please login again."
+            });
+        }
+
         const decoded = jwt.verify(token,process.env.JWT_SECRET);
-        console.log(decoded);
+        req.token = token;
         req.user = decoded;
         next();
     } catch (error) {

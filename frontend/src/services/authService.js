@@ -11,3 +11,14 @@ export const loginUser = async (userData) => {
 
   return response.data;
 };
+
+export const logoutUser = async () => {
+  try {
+    const response = await api.post("/auth/logout");
+    return response.data;
+  } catch (error) {
+    // If offline or network error, silently proceed
+    console.warn("Backend logout notification failed:", error.message);
+    return null;
+  }
+};

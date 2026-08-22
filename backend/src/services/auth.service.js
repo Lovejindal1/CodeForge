@@ -37,15 +37,30 @@ const login =  async (userData) => {
         },
         process.env.JWT_SECRET,
         {
-            expiresIn: process.env.JWT_EXPIRES_IN
+            expiresIn: process.env.JWT_EXPIRES_IN || "24h"
         }
-    )
+    );
 
     user.password = undefined;
-    return {user, token};
-
+    return { user, token };
 }
 
+const logout = async (token, user) => {
+    if (!token) return true;
+
+    // Calculate remaining seconds until JWT expiration
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    const remainingSeconds = user?.exp ? user.exp - nowInSeconds : 86400; // fallback 24h
+
+    if (remainingSeconds > 0) {
+        const { setCache } = require("../utils/cache");
+        await setCache(`blacklist:${token}`, "revoked", remainingSeconds);
+        console.log(`Token blacklisted in Redis for ${remainingSeconds}s`);
+    }
+
+    return true;
+};
+
 module.exports = {
-    register, login
+    register, login, logout
 }

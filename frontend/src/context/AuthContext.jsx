@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { getCurrentUser } from "../services/userService";
+import { logoutUser } from "../services/authService";
 
 // 1. Create the context
 const AuthContext = createContext(null);
@@ -10,11 +11,17 @@ export function AuthProvider({ children }) {
   const [token, setToken]     = useState(() => localStorage.getItem("token")); // token from storage
   const [loading, setLoading] = useState(true);   // true while we verify the session on page load
 
-  // logout: clear everything
-  const logout = useCallback(() => {
-    localStorage.removeItem("token");
-    setToken(null);
-    setUser(null);
+  // logout: notify backend to blacklist token & clear local state
+  const logout = useCallback(async () => {
+    try {
+      await logoutUser();
+    } catch {
+      // ignore network errors on logout
+    } finally {
+      localStorage.removeItem("token");
+      setToken(null);
+      setUser(null);
+    }
   }, []);
 
   // verifyUser: called on mount & after login to fetch /users/me
